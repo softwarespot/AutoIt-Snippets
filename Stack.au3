@@ -64,10 +64,10 @@ EndFunc   ;==>Stack
 Func Stack_ToArray(ByRef $aStack)
 	If UBound($aStack) And $aStack[$STACK_COUNT] Then
 		Local $aArray[$aStack[$STACK_COUNT]]
-		Local $j = 0
+		Local $j = $aStack[$STACK_COUNT] - 1
 		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
 			$aArray[$j] = $aStack[$i]
-			$j += 1
+			$j -= 1
 		Next
 		Return $aArray
 	EndIf
