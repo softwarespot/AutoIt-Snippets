@@ -1,4 +1,6 @@
-Global Enum $STACK_INDEX, $STACK_UBOUND, $STACK_MAX
+#include <Array.au3>
+
+Global Enum $STACK_INDEX, $STACK_COUNT, $STACK_UBOUND, $STACK_MAX
 
 Example()
 
@@ -18,11 +20,15 @@ Func Example()
 
 	ConsoleWrite('Count: ' & Stack_Count($hStack) & @CRLF)
 
+	Local $aStack = Stack_ToArray($hStack) ; Create an array from the stack.
+	_ArrayDisplay($aStack)
+
 	Stack_Clear($hStack) ; Clear the stack.
 EndFunc   ;==>Example
 
 ; Functions:
 ; Stack - Create a stack handle.
+; Stack_ToArray - Create an array from the stack.
 ; Stack_Clear - Remove all items/objects from the stack.
 ; Stack_Count - Retrieve the number of items/objects on the stack.
 ; Stack_Peek - Peek at the item/object in the stack.
@@ -44,6 +50,29 @@ Func Stack()
 	$aStack[$STACK_UBOUND] = $STACK_MAX
 	Return $aStack
 EndFunc   ;==>Stack
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: Stack_ToArray
+; Description ...: Create an array from the stack.
+; Syntax ........: Stack_ToArray(ByRef $aStack)
+; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
+; Return values .: Success: A zero based array.
+;				   Failure: Sets @error to non-zero and returns Null.
+; Author ........: guinness
+; Example .......: Yes
+; ===============================================================================================================================
+Func Stack_ToArray(ByRef $aStack)
+	If UBound($aStack) And $aStack[$STACK_COUNT] Then
+		Local $aArray[$aStack[$STACK_COUNT]]
+		Local $j = 0
+		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
+			$aArray[$j] = $aStack[$i]
+			$j += 1
+		Next
+		Return $aArray
+	EndIf
+	Return SetError(1, 0, Null)
+EndFunc   ;==>Stack_ToArray
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Stack_Clear
@@ -71,7 +100,7 @@ EndFunc   ;==>Stack_Clear
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Count(ByRef $aStack)
-	Return UBound($aStack) And $aStack[$STACK_INDEX] >= $STACK_MAX ? $aStack[$STACK_INDEX] - $STACK_UBOUND : 0
+	Return UBound($aStack) And $aStack[$STACK_COUNT] >= 0 ? $aStack[$STACK_COUNT] : 0
 EndFunc   ;==>Stack_Count
 
 ; #FUNCTION# ====================================================================================================================
@@ -100,6 +129,7 @@ EndFunc   ;==>Stack_Peek
 ; ===============================================================================================================================
 Func Stack_Pop(ByRef $aStack)
 	If UBound($aStack) And $aStack[$STACK_INDEX] >= $STACK_MAX Then
+		$aStack[$STACK_COUNT] -= 1 ; Decrease the count.
 		Local $sData = $aStack[$aStack[$STACK_INDEX]] ; Save the stack item/object.
 		$aStack[$aStack[$STACK_INDEX]] = Null ; Set to null.
 		$aStack[$STACK_INDEX] -= 1 ; Decrease the index by 1.
@@ -126,6 +156,7 @@ EndFunc   ;==>Stack_Pop
 Func Stack_Push(ByRef $aStack, $vData)
 	If UBound($aStack) Then
 		$aStack[$STACK_INDEX] += 1 ; Increase the stack by 1.
+		$aStack[$STACK_COUNT] += 1 ; Increase the count.
 		If $aStack[$STACK_INDEX] >= $aStack[$STACK_UBOUND] Then ; ReDim the internal stack array if required.
 			$aStack[$STACK_UBOUND] = Ceiling($aStack[$STACK_UBOUND] * 1.5)
 			ReDim $aStack[$aStack[$STACK_UBOUND]]
