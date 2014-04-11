@@ -1,3 +1,5 @@
+#include <Array.au3>
+
 Global Enum $QUEUE_FIRSTINDEX, $QUEUE_LASTINDEX, $QUEUE_COUNT, $QUEUE_UBOUND, $QUEUE_MAX
 
 Example()
@@ -18,11 +20,15 @@ Func Example()
 
 	ConsoleWrite('Count: ' & Queue_Count($hQueue) & @CRLF)
 
+	Local $aQueue = Queue_ToArray($hQueue) ; Create an array from the queue.
+	_ArrayDisplay($aQueue)
+
 	Queue_Clear($hQueue) ; Clear the queue.
 EndFunc   ;==>Example
 
 ; Functions:
 ; Queue - Create a queue handle.
+; Queue_ToArray - Create an array from the queue.
 ; Queue_Clear - Remove all items/objects from the queue.
 ; Queue_Count - Retrieve the number of items/objects on the queue.
 ; Queue_Peek - Peek at the item/object in the queue.
@@ -41,6 +47,29 @@ EndFunc   ;==>Example
 Func Queue()
 	Return __Queue()
 EndFunc   ;==>Queue
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: Queue_ToArray
+; Description ...: Create an array from the queue.
+; Syntax ........: Queue_ToArray(ByRef $aQueue)
+; Parameters ....: $aQueue              - [in/out] Handle returned by Queue().
+; Return values .: Success: A zero based array.
+;				   Failure: Sets @error to non-zero and returns Null.
+; Author ........: guinness
+; Example .......: Yes
+; ===============================================================================================================================
+Func Queue_ToArray(ByRef $aQueue)
+	If UBound($aQueue) And $aQueue[$QUEUE_COUNT] Then
+		Local $aArray[$aQueue[$QUEUE_COUNT]]
+		Local $j = 0
+		For $i = $aQueue[$QUEUE_FIRSTINDEX] + 1 To $aQueue[$QUEUE_LASTINDEX]
+			$aArray[$j] = $aQueue[$i]
+			$j += 1
+		Next
+		Return $aArray
+	EndIf
+	Return SetError(1, 0, Null)
+EndFunc   ;==>Queue_ToArray
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Queue_Clear
