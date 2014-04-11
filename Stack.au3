@@ -1,5 +1,3 @@
-#include <Array.au3>
-
 Global Enum $STACK_INDEX, $STACK_UBOUND, $STACK_MAX
 
 Example()
