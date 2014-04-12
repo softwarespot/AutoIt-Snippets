@@ -1,6 +1,6 @@
 #include <StringConstants.au3>
 
-#include "Stack.au3" ; Download from http://www.autoitscript.com/forum/topic/160510-stack-udf-based-on-the-concept-in-net/
+#include "Stack.au3"
 
 Example()
 
