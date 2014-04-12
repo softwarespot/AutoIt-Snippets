@@ -31,9 +31,10 @@ EndFunc   ;==>Example
 ; Queue_ToArray - Create an array from the queue.
 ; Queue_Clear - Remove all items/objects from the queue.
 ; Queue_Count - Retrieve the number of items/objects on the queue.
-; Queue_Peek - Peek at the item/object in the queue.
 ; Queue_Dequeue - Pop the first item/object from the queue.
 ; Queue_Enqueue - Push an item/object to the queue.
+; Queue_Peek - Peek at the item/object in the queue.
+; Queue_TrimToSize - Set the capacity to the number of items/objects in the queue.
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Queue
@@ -82,7 +83,7 @@ EndFunc   ;==>Queue_ToArray
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Clear(ByRef $aQueue)
-	$aQueue = Queue()
+	$aQueue = __Queue($aQueue, True)
 	Return True
 EndFunc   ;==>Queue_Clear
 
@@ -163,39 +164,48 @@ Func Queue_Enqueue(ByRef $aQueue, $vData)
 	Return SetError(1, 0, Null)
 EndFunc   ;==>Queue_Enqueue
 
+; #FUNCTION# ====================================================================================================================
+; Name ..........: Queue_TrimToSize
+; Description ...: Set the capacity to the number of items/objects in the queue.
+; Syntax ........: Queue_TrimToSize(ByRef $aQueue)
+; Parameters ....: $aQueue              - [in/out] Handle returned by Queue().
+; Return values .: Success: True.
+;				   Failure: None
+; Author ........: guinness
+; Example .......: Yes
+; ===============================================================================================================================
+Func Queue_TrimToSize(ByRef $aQueue)
+	$aQueue = __Queue($aQueue)
+	Return True
+EndFunc   ;==>Queue_TrimToSize
+
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __Queue
 ; Description ...:Create a new queue object or re-size a current queue object.
 ; Syntax ........: __Queue([$vQueue = Default])
-; Parameters ....: $vQueue              - [optional] A variant valueof either Default or queue object. Default is Default.
+; Parameters ....: $vQueue              - [optional] A variant value of either Default or queue object. Default is Default.
+;                  $fIsClear            - [optional] Clear the queue items/objects. Default is Default.
 ; Return values .: New queue object.
 ; Author ........: guinness
 ; ===============================================================================================================================
-Func __Queue($vQueue = Default)
-	Local $aQueue = 0
-	If $vQueue = Default Or Not UBound($vQueue) Or $vQueue[$QUEUE_COUNT] = 0 Then
-		Local $aQueueInit[$QUEUE_MAX]
-		$aQueueInit[$QUEUE_FIRSTINDEX] = $QUEUE_UBOUND
-		$aQueueInit[$QUEUE_LASTINDEX] = $QUEUE_UBOUND
-		$aQueueInit[$QUEUE_COUNT] = 0
-		$aQueueInit[$QUEUE_UBOUND] = $QUEUE_MAX
-		$aQueue = $aQueueInit
-		$aQueueInit = 0
-		$vQueue = 0
-	Else
-		Local $aQueueReDim[$QUEUE_MAX + $vQueue[$QUEUE_COUNT]]
-		$aQueueReDim[$QUEUE_FIRSTINDEX] = $QUEUE_UBOUND
-		$aQueueReDim[$QUEUE_LASTINDEX] = $QUEUE_UBOUND + $vQueue[$QUEUE_COUNT]
-		$aQueueReDim[$QUEUE_COUNT] = $vQueue[$QUEUE_COUNT]
-		$aQueueReDim[$QUEUE_UBOUND] = $QUEUE_UBOUND + $vQueue[$QUEUE_COUNT]
+Func __Queue($vQueue = Default, $fIsClear = Default)
+	Local $iCount = (Not UBound($vQueue)) ? 0 : $vQueue[$QUEUE_COUNT]
+	Local $aQueue[$QUEUE_MAX + $iCount]
+	$aQueue[$QUEUE_FIRSTINDEX] = $QUEUE_UBOUND
+	$aQueue[$QUEUE_LASTINDEX] = $QUEUE_UBOUND
+	$aQueue[$QUEUE_COUNT] = 0
+	$aQueue[$QUEUE_UBOUND] = $QUEUE_UBOUND + $iCount
+
+	If Not $fIsClear And $iCount Then ; If not clear and there is a count then add the values.
+		$aQueue[$QUEUE_LASTINDEX] = $QUEUE_UBOUND + $iCount
+		$aQueue[$QUEUE_COUNT] = $iCount
+		$aQueue[$QUEUE_UBOUND] = $QUEUE_UBOUND + $iCount
 		Local $j = $vQueue[$QUEUE_FIRSTINDEX] + 1
-		For $i = $QUEUE_MAX To $QUEUE_MAX + $vQueue[$QUEUE_COUNT] - 1
-			$aQueueReDim[$i] = $vQueue[$j]
+		For $i = $QUEUE_MAX To $QUEUE_MAX + $iCount - 1
+			$aQueue[$i] = $vQueue[$j]
 			$j += 1
 		Next
-		$aQueue = $aQueueReDim
-		$aQueueReDim = 0
-		$vQueue = 0
 	EndIf
+	$vQueue = 0
 	Return $aQueue
 EndFunc   ;==>__Queue
