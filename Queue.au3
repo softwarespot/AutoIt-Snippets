@@ -24,6 +24,7 @@ Func Example()
 	_ArrayDisplay($aQueue)
 
 	Queue_Clear($hQueue) ; Clear the queue.
+	Queue_TrimToSize($hQueue) ; Decrease the memory footprint.
 EndFunc   ;==>Example
 
 ; Functions:
@@ -129,12 +130,12 @@ Func Queue_Dequeue(ByRef $aQueue)
 	If UBound($aQueue) And $aQueue[$QUEUE_LASTINDEX] >= $QUEUE_MAX Then
 		$aQueue[$QUEUE_FIRSTINDEX] += 1
 		$aQueue[$QUEUE_COUNT] -= 1 ; Decrease the count.
-		Local $sData = $aQueue[$aQueue[$QUEUE_FIRSTINDEX]] ; Save the queue item/object.
+		Local $vData = $aQueue[$aQueue[$QUEUE_FIRSTINDEX]] ; Save the queue item/object.
 		$aQueue[$aQueue[$QUEUE_FIRSTINDEX]] = Null ; Set to null.
 		If ($aQueue[$QUEUE_FIRSTINDEX] - $QUEUE_UBOUND) > 10 Then ; If there are too many blank rows then re-size the queue.
 			$aQueue = __Queue($aQueue)
 		EndIf
-		Return $sData
+		Return $vData
 	EndIf
 	Return SetError(1, 0, Null)
 EndFunc   ;==>Queue_Dequeue
@@ -181,7 +182,7 @@ EndFunc   ;==>Queue_TrimToSize
 
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __Queue
-; Description ...:Create a new queue object or re-size a current queue object.
+; Description ...: Create a new queue object or re-size a current queue object.
 ; Syntax ........: __Queue([$vQueue = Default])
 ; Parameters ....: $vQueue              - [optional] A variant value of either Default or queue object. Default is Default.
 ;                  $fIsClear            - [optional] Clear the queue items/objects. Default is Default.
@@ -194,12 +195,12 @@ Func __Queue($vQueue = Default, $fIsClear = Default)
 	$aQueue[$QUEUE_FIRSTINDEX] = $QUEUE_UBOUND
 	$aQueue[$QUEUE_LASTINDEX] = $QUEUE_UBOUND
 	$aQueue[$QUEUE_COUNT] = 0
-	$aQueue[$QUEUE_UBOUND] = $QUEUE_UBOUND + $iCount
+	$aQueue[$QUEUE_UBOUND] = $QUEUE_MAX + $iCount
 
 	If Not $fIsClear And $iCount Then ; If not clear and there is a count then add the values.
 		$aQueue[$QUEUE_LASTINDEX] = $QUEUE_UBOUND + $iCount
 		$aQueue[$QUEUE_COUNT] = $iCount
-		$aQueue[$QUEUE_UBOUND] = $QUEUE_UBOUND + $iCount
+
 		Local $j = $vQueue[$QUEUE_FIRSTINDEX] + 1
 		For $i = $QUEUE_MAX To $QUEUE_MAX + $iCount - 1
 			$aQueue[$i] = $vQueue[$j]
