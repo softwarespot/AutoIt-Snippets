@@ -192,12 +192,12 @@ EndFunc   ;==>Stack_TrimExcess
 Func __Stack($vStack = Default, $fIsClear = Default)
 	Local $iCount = (Not UBound($vStack)) ? 0 : $vStack[$STACK_COUNT]
 	Local $aStack[$STACK_MAX + $iCount]
-	$aStack[$STACK_INDEX] = $STACK_UBOUND
+	$aStack[$STACK_INDEX] = $STACK_MAX - 1
 	$aStack[$STACK_COUNT] = 0
 	$aStack[$STACK_UBOUND] = $STACK_MAX + $iCount
 
 	If Not $fIsClear And $iCount Then ; If not clear and there is a count then add the values.
-		$aStack[$STACK_INDEX] = $STACK_UBOUND + $iCount
+		$aStack[$STACK_INDEX] = $STACK_MAX - 1 + $iCount
 		$aStack[$STACK_COUNT] = $iCount
 
 		ReDim $aStack[$aStack[$STACK_UBOUND]]

@@ -132,7 +132,7 @@ Func Queue_Dequeue(ByRef $aQueue)
 		$aQueue[$QUEUE_COUNT] -= 1 ; Decrease the count.
 		Local $vData = $aQueue[$aQueue[$QUEUE_FIRSTINDEX]] ; Save the queue item/object.
 		$aQueue[$aQueue[$QUEUE_FIRSTINDEX]] = Null ; Set to null.
-		If ($aQueue[$QUEUE_FIRSTINDEX] - $QUEUE_UBOUND) > 10 Then ; If there are too many blank rows then re-size the queue.
+		If ($aQueue[$QUEUE_FIRSTINDEX] - $QUEUE_MAX) > 10 Then ; If there are too many blank rows then re-size the queue.
 			$aQueue = __Queue($aQueue)
 		EndIf
 		Return $vData
@@ -192,13 +192,13 @@ EndFunc   ;==>Queue_TrimToSize
 Func __Queue($vQueue = Default, $fIsClear = Default)
 	Local $iCount = (Not UBound($vQueue)) ? 0 : $vQueue[$QUEUE_COUNT]
 	Local $aQueue[$QUEUE_MAX + $iCount]
-	$aQueue[$QUEUE_FIRSTINDEX] = $QUEUE_UBOUND
-	$aQueue[$QUEUE_LASTINDEX] = $QUEUE_UBOUND
+	$aQueue[$QUEUE_FIRSTINDEX] = $QUEUE_MAX - 1
+	$aQueue[$QUEUE_LASTINDEX] = $QUEUE_MAX - 1
 	$aQueue[$QUEUE_COUNT] = 0
 	$aQueue[$QUEUE_UBOUND] = $QUEUE_MAX + $iCount
 
 	If Not $fIsClear And $iCount Then ; If not clear and there is a count then add the values.
-		$aQueue[$QUEUE_LASTINDEX] = $QUEUE_UBOUND + $iCount
+		$aQueue[$QUEUE_LASTINDEX] = $QUEUE_MAX - 1 + $iCount
 		$aQueue[$QUEUE_COUNT] = $iCount
 
 		Local $j = $vQueue[$QUEUE_FIRSTINDEX] + 1
