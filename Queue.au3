@@ -5,7 +5,7 @@ Global Enum $QUEUE_FIRSTINDEX, $QUEUE_LASTINDEX, $QUEUE_COUNT, $QUEUE_UBOUND, $Q
 Example()
 
 Func Example()
-	Local $hQueue = Queue() ; Create a queue object.
+	Local $hQueue = Queue(100) ; Create a queue object.
 
 	For $i = 1 To 20
 		If Queue_Enqueue($hQueue, 'Example_' & $i) Then ConsoleWrite('Enqueue: ' & 'Example_' & $i & @CRLF) ; Push random data to the queue.
@@ -40,14 +40,15 @@ EndFunc   ;==>Example
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Queue
 ; Description ...: Create a queue handle.
-; Syntax ........: Queue()
+; Syntax ........: Queue([$iInitialSize = Default])
+; Parameters ....: $iInitialSize        - [optional] Initialise the queue with a certain size. Useful if you know how large the queue will grow. Default is zero
 ; Parameters ....: None
 ; Return values .: Handle that should be passed to all relevant queue functions.
 ; Author ........: guinness
 ; Example .......: Yes
 ; ===============================================================================================================================
-Func Queue()
-	Return __Queue()
+Func Queue($iInitialSize = Default)
+	Return __Queue($iInitialSize, False)
 EndFunc   ;==>Queue
 
 ; #FUNCTION# ====================================================================================================================
@@ -61,7 +62,7 @@ EndFunc   ;==>Queue
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_ToArray(ByRef $aQueue)
-	If UBound($aQueue) And $aQueue[$QUEUE_COUNT] Then
+	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_COUNT] Then
 		Local $aArray[$aQueue[$QUEUE_COUNT]]
 		Local $j = 0
 		For $i = $aQueue[$QUEUE_FIRSTINDEX] + 1 To $aQueue[$QUEUE_LASTINDEX]
@@ -84,7 +85,7 @@ EndFunc   ;==>Queue_ToArray
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Clear(ByRef $aQueue)
-	$aQueue = __Queue($aQueue, True)
+	$aQueue = __Queue($aQueue, False)
 	Return True
 EndFunc   ;==>Queue_Clear
 
@@ -99,7 +100,7 @@ EndFunc   ;==>Queue_Clear
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Count(ByRef $aQueue)
-	Return UBound($aQueue) And $aQueue[$QUEUE_COUNT] >= 0 ? $aQueue[$QUEUE_COUNT] : 0
+	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_COUNT] >= 0 ? $aQueue[$QUEUE_COUNT] : 0
 EndFunc   ;==>Queue_Count
 
 ; #FUNCTION# ====================================================================================================================
@@ -113,7 +114,7 @@ EndFunc   ;==>Queue_Count
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Peek(ByRef $aQueue)
-	Return UBound($aQueue) And $aQueue[$QUEUE_FIRSTINDEX] >= $QUEUE_MAX ? $aQueue[$aQueue[$QUEUE_FIRSTINDEX] + 1] : SetError(1, 0, Null)
+	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_FIRSTINDEX] >= $QUEUE_MAX ? $aQueue[$aQueue[$QUEUE_FIRSTINDEX] + 1] : SetError(1, 0, Null)
 EndFunc   ;==>Queue_Peek
 
 ; #FUNCTION# ====================================================================================================================
@@ -127,14 +128,14 @@ EndFunc   ;==>Queue_Peek
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Dequeue(ByRef $aQueue)
-	If UBound($aQueue) And $aQueue[$QUEUE_LASTINDEX] >= $QUEUE_MAX Then
+	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_LASTINDEX] >= $QUEUE_MAX Then
 		$aQueue[$QUEUE_FIRSTINDEX] += 1
 		$aQueue[$QUEUE_COUNT] -= 1 ; Decrease the count.
 		Local $vData = $aQueue[$aQueue[$QUEUE_FIRSTINDEX]] ; Save the queue item/object.
 		$aQueue[$aQueue[$QUEUE_FIRSTINDEX]] = Null ; Set to null.
-		If ($aQueue[$QUEUE_FIRSTINDEX] - $QUEUE_MAX) > 15 Then ; If there are too many blank rows then re-size the queue.
-			$aQueue = __Queue($aQueue)
-		EndIf
+		; If ($aQueue[$QUEUE_FIRSTINDEX] - $QUEUE_MAX) > 15 Then ; If there are too many blank rows then re-size the queue.
+		; $aQueue = __Queue($aQueue, True)
+		; EndIf
 		Return $vData
 	EndIf
 	Return SetError(1, 0, Null)
@@ -152,7 +153,7 @@ EndFunc   ;==>Queue_Dequeue
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Enqueue(ByRef $aQueue, $vData)
-	If UBound($aQueue) Then
+	If UBound($aQueue) >= $QUEUE_MAX Then
 		$aQueue[$QUEUE_LASTINDEX] += 1 ; Increase the queue by 1.
 		$aQueue[$QUEUE_COUNT] += 1 ; Increase the count.
 		If $aQueue[$QUEUE_LASTINDEX] >= $aQueue[$QUEUE_UBOUND] Then ; ReDim the internal queue array if required.
@@ -176,28 +177,29 @@ EndFunc   ;==>Queue_Enqueue
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_TrimToSize(ByRef $aQueue)
-	$aQueue = __Queue($aQueue)
+	$aQueue = __Queue($aQueue, True)
 	Return True
 EndFunc   ;==>Queue_TrimToSize
 
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __Queue
 ; Description ...: Create a new queue object or re-size a current queue object.
-; Syntax ........: __Queue([$vQueue = Default])
+; Syntax ........: __Queue([$vQueue = Default[, $fIsCopyObjects = Default]])
 ; Parameters ....: $vQueue              - [optional] A variant value of either Default or queue object. Default is Default.
-;                  $fIsClear            - [optional] Clear the queue items/objects. Default is Default.
+;                  $fIsCopyObjects      - [optional] Copy the previous queue items/objects. Default is False
 ; Return values .: New queue object.
 ; Author ........: guinness
 ; ===============================================================================================================================
-Func __Queue($vQueue = Default, $fIsClear = Default)
-	Local $iCount = (Not UBound($vQueue)) ? 0 : $vQueue[$QUEUE_COUNT]
+Func __Queue($vQueue = Default, $fIsCopyObjects = False)
+	Local $iCount = (UBound($vQueue) >= $QUEUE_MAX) ? $vQueue[$QUEUE_COUNT] : ((IsInt($vQueue) And $vQueue > 0) ? $vQueue : 0)
+
 	Local $aQueue[$QUEUE_MAX + $iCount]
 	$aQueue[$QUEUE_FIRSTINDEX] = $QUEUE_MAX - 1
 	$aQueue[$QUEUE_LASTINDEX] = $QUEUE_MAX - 1
 	$aQueue[$QUEUE_COUNT] = 0
 	$aQueue[$QUEUE_UBOUND] = $QUEUE_MAX + $iCount
 
-	If Not $fIsClear And $iCount Then ; If not clear and there is a count then add the values.
+	If $fIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
 		$aQueue[$QUEUE_LASTINDEX] = $QUEUE_MAX - 1 + $iCount
 		$aQueue[$QUEUE_COUNT] = $iCount
 
