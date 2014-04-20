@@ -132,7 +132,7 @@ Func Queue_Dequeue(ByRef $aQueue)
 		$aQueue[$QUEUE_COUNT] -= 1 ; Decrease the count.
 		Local $vData = $aQueue[$aQueue[$QUEUE_FIRSTINDEX]] ; Save the queue item/object.
 		$aQueue[$aQueue[$QUEUE_FIRSTINDEX]] = Null ; Set to null.
-		If ($aQueue[$QUEUE_FIRSTINDEX] - $QUEUE_MAX) > 10 Then ; If there are too many blank rows then re-size the queue.
+		If ($aQueue[$QUEUE_FIRSTINDEX] - $QUEUE_MAX) > 15 Then ; If there are too many blank rows then re-size the queue.
 			$aQueue = __Queue($aQueue)
 		EndIf
 		Return $vData
