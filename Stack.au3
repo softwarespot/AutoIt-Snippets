@@ -35,7 +35,7 @@ EndFunc   ;==>Example
 ; Stack_Peek - Peek at the item/object in the stack.
 ; Stack_Pop - Pop the last item/object from the stack.
 ; Stack_Push - Push an item/object to the stack.
-; Stack_TrimToSize - Set the capacity to the number of items/objects in the stack.
+; Stack_TrimExcess - Set the capacity to the number of items/objects in the stack.
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Stack
