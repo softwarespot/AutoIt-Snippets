@@ -24,6 +24,7 @@ Func Example()
 	_ArrayDisplay($aStack)
 
 	Stack_Clear($hStack) ; Clear the stack.
+	Stack_TrimExcess($hStack) ; Decrease the memory footprint.
 EndFunc   ;==>Example
 
 ; Functions:
@@ -34,6 +35,7 @@ EndFunc   ;==>Example
 ; Stack_Peek - Peek at the item/object in the stack.
 ; Stack_Pop - Pop the last item/object from the stack.
 ; Stack_Push - Push an item/object to the stack.
+; Stack_TrimToSize - Set the capacity to the number of items/objects in the stack.
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Stack
@@ -45,10 +47,7 @@ EndFunc   ;==>Example
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack()
-	Local $aStack[$STACK_MAX]
-	$aStack[$STACK_INDEX] = $STACK_UBOUND
-	$aStack[$STACK_UBOUND] = $STACK_MAX
-	Return $aStack
+	Return __Stack()
 EndFunc   ;==>Stack
 
 ; #FUNCTION# ====================================================================================================================
@@ -85,7 +84,7 @@ EndFunc   ;==>Stack_ToArray
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Clear(ByRef $aStack)
-	$aStack = Stack()
+	$aStack = __Stack($aStack, True)
 	Return True
 EndFunc   ;==>Stack_Clear
 
@@ -130,14 +129,13 @@ EndFunc   ;==>Stack_Peek
 Func Stack_Pop(ByRef $aStack)
 	If UBound($aStack) And $aStack[$STACK_INDEX] >= $STACK_MAX Then
 		$aStack[$STACK_COUNT] -= 1 ; Decrease the count.
-		Local $sData = $aStack[$aStack[$STACK_INDEX]] ; Save the stack item/object.
+		Local $vData = $aStack[$aStack[$STACK_INDEX]] ; Save the stack item/object.
 		$aStack[$aStack[$STACK_INDEX]] = Null ; Set to null.
 		$aStack[$STACK_INDEX] -= 1 ; Decrease the index by 1.
 		If ($aStack[$STACK_UBOUND] - $aStack[$STACK_INDEX]) > 15 Then ; If there are too many blank rows then re-size the stack.
-			$aStack[$STACK_UBOUND] = ($aStack[$STACK_INDEX] < $STACK_MAX) ? $STACK_MAX : $aStack[$STACK_INDEX] + 1
-			ReDim $aStack[$aStack[$STACK_UBOUND]]
+			$aStack = __Stack($aStack)
 		EndIf
-		Return $sData
+		Return $vData
 	EndIf
 	Return SetError(1, 0, Null)
 EndFunc   ;==>Stack_Pop
@@ -166,3 +164,44 @@ Func Stack_Push(ByRef $aStack, $vData)
 	EndIf
 	Return SetError(1, 0, Null)
 EndFunc   ;==>Stack_Push
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: Stack_TrimExcess
+; Description ...: Set the capacity to the number of items/objects in the stack.
+; Syntax ........: Stack_TrimExcess(ByRef $aStack)
+; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
+; Return values .: Success: True.
+;				   Failure: None
+; Author ........: guinness
+; Example .......: Yes
+; ===============================================================================================================================
+Func Stack_TrimExcess(ByRef $aStack)
+	$aStack = __Stack($aStack)
+	Return True
+EndFunc   ;==>Stack_TrimExcess
+
+; #INTERNAL_USE_ONLY# ===========================================================================================================
+; Name ..........: __Stack
+; Description ...: Create a new stack object or re-size a current stack object.
+; Syntax ........: __Stack([$vStack = Default])
+; Parameters ....: $vStack              - [optional] A variant value of either Default or stack object. Default is Default.
+;                  $fIsClear            - [optional] Clear the stack items/objects. Default is Default.
+; Return values .: New stack object.
+; Author ........: guinness
+; ===============================================================================================================================
+Func __Stack($vStack = Default, $fIsClear = Default)
+	Local $iCount = (Not UBound($vStack)) ? 0 : $vStack[$STACK_COUNT]
+	Local $aStack[$STACK_MAX + $iCount]
+	$aStack[$STACK_INDEX] = $STACK_UBOUND
+	$aStack[$STACK_COUNT] = 0
+	$aStack[$STACK_UBOUND] = $STACK_MAX + $iCount
+
+	If Not $fIsClear And $iCount Then ; If not clear and there is a count then add the values.
+		$aStack[$STACK_INDEX] = $STACK_UBOUND + $iCount
+		$aStack[$STACK_COUNT] = $iCount
+
+		ReDim $aStack[$aStack[$STACK_UBOUND]]
+	EndIf
+	$vStack = 0
+	Return $aStack
+EndFunc   ;==>__Stack
