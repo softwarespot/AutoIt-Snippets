@@ -5,7 +5,7 @@ Global Enum $QUEUE_FIRSTINDEX, $QUEUE_LASTINDEX, $QUEUE_COUNT, $QUEUE_UBOUND, $Q
 Example()
 
 Func Example()
-	Local $hQueue = Queue(100) ; Create a queue object.
+	Local $hQueue = Queue() ; Create a queue object.
 
 	For $i = 1 To 20
 		If Queue_Enqueue($hQueue, 'Example_' & $i) Then ConsoleWrite('Enqueue: ' & 'Example_' & $i & @CRLF) ; Push random data to the queue.

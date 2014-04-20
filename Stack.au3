@@ -5,7 +5,7 @@ Global Enum $STACK_INDEX, $STACK_COUNT, $STACK_UBOUND, $STACK_MAX
 Example()
 
 Func Example()
-	Local $hStack = Stack(100) ; Create a stack object.
+	Local $hStack = Stack() ; Create a stack object.
 
 	For $i = 1 To 20
 		If Stack_Push($hStack, 'Example_' & $i) Then ConsoleWrite('Push: ' & 'Example_' & $i & @CRLF) ; Push random data to the stack.
