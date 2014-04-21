@@ -252,7 +252,7 @@ Func __Stack($vStack = Default, $fIsCopyObjects = False)
 	Local $aStack[$iUBound]
 	$aStack[$STACK_INDEX] = $STACK_MAX - 1
 	$aStack[$STACK_COUNT] = 0
-	$aStack[$STACK_UBOUND] = $iUBound)
+	$aStack[$STACK_UBOUND] = $iUBound
 
 	If $fIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
 		$aStack[$STACK_INDEX] = $STACK_MAX - 1 + $iCount
