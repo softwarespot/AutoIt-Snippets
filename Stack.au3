@@ -20,6 +20,7 @@ Func Example()
 	ConsoleWrite('Peek: ' & Stack_Peek($hStack) & @CRLF)
 
 	ConsoleWrite('Count: ' & Stack_Count($hStack) & @CRLF)
+	ConsoleWrite('Capacity: ' & Stack_Capacity($hStack) & @CRLF)
 
 	Stack_ForEach($hStack, AppendUnderscore) ; Loop through the stack and pass each item to the custom function.
 
@@ -44,6 +45,7 @@ EndFunc   ;==>Contains
 ; Functions:
 ; Stack - Create a stack handle.
 ; Stack_ToArray - Create an array from the stack.
+; Stack_Capacity - Retrieve the capacity of the internal stack elements.
 ; Stack_Clear - Remove all items/objects from the stack.
 ; Stack_Count - Retrieve the number of items/objects on the stack.
 ; Stack_ForEach - Loop through the stack and pass each item/object to a custom function for processing.
@@ -88,6 +90,20 @@ Func Stack_ToArray(ByRef $aStack)
 	EndIf
 	Return SetError(1, 0, Null)
 EndFunc   ;==>Stack_ToArray
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: Stack_Capacity
+; Description ...: Retrieve the capacity of the internal stack elements.
+; Syntax ........: Stack_Capacity(ByRef $aStack)
+; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
+; Return values .: Success: Capacity of the internal stack.
+;				   Failure: None
+; Author ........: guinness
+; Example .......: Yes
+; ===============================================================================================================================
+Func Stack_Capacity(ByRef $aStack)
+	Return UBound($aStack) >= $STACK_MAX ? $aStack[$STACK_UBOUND] - $STACK_MAX : 0
+EndFunc   ;==>Stack_Capacity
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Stack_Clear
@@ -196,7 +212,7 @@ Func Stack_Push(ByRef $aStack, $vData)
 		$aStack[$STACK_INDEX] += 1 ; Increase the stack by 1.
 		$aStack[$STACK_COUNT] += 1 ; Increase the count.
 		If $aStack[$STACK_INDEX] >= $aStack[$STACK_UBOUND] Then ; ReDim the internal stack array if required.
-			$aStack[$STACK_UBOUND] = Ceiling($aStack[$STACK_UBOUND] * 1.5)
+			$aStack[$STACK_UBOUND] = Ceiling(($aStack[$STACK_UBOUND] - $STACK_MAX) * 2) + $STACK_MAX
 			ReDim $aStack[$aStack[$STACK_UBOUND]]
 		EndIf
 		$aStack[$aStack[$STACK_INDEX]] = $vData ; Set the stack element.
@@ -232,10 +248,11 @@ EndFunc   ;==>Stack_TrimExcess
 Func __Stack($vStack = Default, $fIsCopyObjects = False)
 	Local $iCount = (UBound($vStack) >= $STACK_MAX) ? $vStack[$STACK_COUNT] : ((IsInt($vStack) And $vStack > 0) ? $vStack : 0)
 
-	Local $aStack[$STACK_MAX + $iCount]
+	Local $iUBound = $STACK_MAX + (($iCount) > 0 ? $iCount : 4) ; STACK_INITIAL_SIZE
+	Local $aStack[$iUBound]
 	$aStack[$STACK_INDEX] = $STACK_MAX - 1
 	$aStack[$STACK_COUNT] = 0
-	$aStack[$STACK_UBOUND] = $STACK_MAX + $iCount
+	$aStack[$STACK_UBOUND] = $iUBound)
 
 	If $fIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
 		$aStack[$STACK_INDEX] = $STACK_MAX - 1 + $iCount

@@ -20,8 +20,9 @@ Func Example()
 	ConsoleWrite('Peek: ' & Queue_Peek($hQueue) & @CRLF)
 
 	ConsoleWrite('Count: ' & Queue_Count($hQueue) & @CRLF)
+	ConsoleWrite('Capacity: ' & Queue_Capacity($hQueue) & @CRLF)
 
-	Queue_ForEach($hQueue, AppendUnderscore) ; Randomise when to return True Or False. The false was break from the ForEach() function.
+	Queue_ForEach($hQueue, AppendUnderscore) ; Loop through the stack and pass each item to the custom function.
 
 	ConsoleWrite('Contains: ' & (Queue_ForEach($hQueue, Contains) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
 
@@ -44,6 +45,7 @@ EndFunc   ;==>Contains
 ; Functions:
 ; Queue - Create a queue handle.
 ; Queue_ToArray - Create an array from the queue.
+; Queue_Capacity - Retrieve the capacity of the internal queue elements.
 ; Queue_Clear - Remove all items/objects from the queue.
 ; Queue_Count - Retrieve the number of items/objects on the queue.
 ; Queue_Dequeue - Pop the first item/object from the queue.
@@ -88,6 +90,20 @@ Func Queue_ToArray(ByRef $aQueue)
 	EndIf
 	Return SetError(1, 0, Null)
 EndFunc   ;==>Queue_ToArray
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: Queue_Capacity
+; Description ...: Retrieve the capacity of the internal queue elements.
+; Syntax ........: Queue_Capacity(ByRef $aQueue)
+; Parameters ....: $aQueue              - [in/out] Handle returned by Queue().
+; Return values .: Success: Capacity of the internal queue
+;				   Failure: None
+; Author ........: guinness
+; Example .......: Yes
+; ===============================================================================================================================
+Func Queue_Capacity(ByRef $aQueue)
+	Return UBound($aQueue) >= $QUEUE_MAX ? $aQueue[$QUEUE_UBOUND] - ($aQueue[$QUEUE_FIRSTINDEX] > $QUEUE_MAX ? $aQueue[$QUEUE_FIRSTINDEX] : $QUEUE_MAX) : 0
+EndFunc   ;==>Queue_Capacity
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Queue_Clear
@@ -196,7 +212,7 @@ Func Queue_Enqueue(ByRef $aQueue, $vData)
 		$aQueue[$QUEUE_LASTINDEX] += 1 ; Increase the queue by 1.
 		$aQueue[$QUEUE_COUNT] += 1 ; Increase the count.
 		If $aQueue[$QUEUE_LASTINDEX] >= $aQueue[$QUEUE_UBOUND] Then ; ReDim the internal queue array if required.
-			$aQueue[$QUEUE_UBOUND] = Ceiling($aQueue[$QUEUE_UBOUND] * 1.5)
+			$aQueue[$QUEUE_UBOUND] = Ceiling(($aQueue[$QUEUE_UBOUND] - $QUEUE_MAX) * 2) + $QUEUE_MAX
 			ReDim $aQueue[$aQueue[$QUEUE_UBOUND]]
 		EndIf
 		$aQueue[$aQueue[$QUEUE_LASTINDEX]] = $vData ; Set the queue element.
@@ -232,11 +248,12 @@ EndFunc   ;==>Queue_TrimToSize
 Func __Queue($vQueue = Default, $fIsCopyObjects = False)
 	Local $iCount = (UBound($vQueue) >= $QUEUE_MAX) ? $vQueue[$QUEUE_COUNT] : ((IsInt($vQueue) And $vQueue > 0) ? $vQueue : 0)
 
-	Local $aQueue[$QUEUE_MAX + $iCount]
+	Local $iUBound = $QUEUE_MAX + (($iCount) > 0 ? $iCount : 4) ; QUEUE_INITIAL_SIZE
+	Local $aQueue[$iUBound]
 	$aQueue[$QUEUE_FIRSTINDEX] = $QUEUE_MAX - 1
 	$aQueue[$QUEUE_LASTINDEX] = $QUEUE_MAX - 1
 	$aQueue[$QUEUE_COUNT] = 0
-	$aQueue[$QUEUE_UBOUND] = $QUEUE_MAX + $iCount
+	$aQueue[$QUEUE_UBOUND] = $iUBound
 
 	If $fIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
 		$aQueue[$QUEUE_LASTINDEX] = $QUEUE_MAX - 1 + $iCount
