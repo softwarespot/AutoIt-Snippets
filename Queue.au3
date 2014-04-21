@@ -239,4 +239,3 @@ Func __Queue($vQueue = Default, $fIsCopyObjects = False)
 	$vQueue = 0
 	Return $aQueue
 EndFunc   ;==>__Queue
-
