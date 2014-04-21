@@ -1,3 +1,4 @@
+#AutoIt3Wrapper_Run_Au3Check=N
 #include <Array.au3>
 
 Global Enum $STACK_INDEX, $STACK_COUNT, $STACK_UBOUND, $STACK_MAX
@@ -29,8 +30,9 @@ Func Example()
 	Stack_TrimExcess($hStack) ; Decrease the memory footprint.
 EndFunc   ;==>Example
 
-Func AppendUnderscore($vItem)
-	Return $vItem & '_'
+Func AppendUnderscore(ByRef $vItem)
+	$vItem &= '_'
+	Return Random(0, 1, 1) ? True : False ; Randomise when to return True Or False. The false was break from the ForEach() function.
 EndFunc   ;==>AppendUnderscore
 
 ; Functions:
@@ -115,7 +117,7 @@ EndFunc   ;==>Stack_Count
 ; Description ...: Loop through the stack and pass each item/object to a custom function for processing.
 ; Syntax ........: Stack_ForEach(ByRef $aStack, $hFunc)
 ; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
-;                  $hFunc               - A delegate to a function that has a single input and a return value.
+;                  $hFunc               - A delegate to a function that has a single ByRef input and a return value of either True (continue looping) or False (exit looping).
 ; Return values .: Success: True.
 ;				   Failure: None
 ; Author ........: guinness
@@ -124,7 +126,9 @@ EndFunc   ;==>Stack_Count
 Func Stack_ForEach(ByRef $aStack, $hFunc)
 	If UBound($aStack) >= $STACK_MAX And IsFunc($hFunc) Then
 		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
-			$aStack[$i] = $hFunc($aStack[$i])
+			If Not $hFunc($aStack[$i]) Then
+				ExitLoop
+			EndIf
 		Next
 	EndIf
 	Return True

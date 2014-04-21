@@ -1,3 +1,4 @@
+#AutoIt3Wrapper_Run_Au3Check=N
 #include <Array.au3>
 
 Global Enum $QUEUE_FIRSTINDEX, $QUEUE_LASTINDEX, $QUEUE_COUNT, $QUEUE_UBOUND, $QUEUE_MAX
@@ -20,7 +21,7 @@ Func Example()
 
 	ConsoleWrite('Count: ' & Queue_Count($hQueue) & @CRLF)
 
-	Queue_ForEach($hQueue, AppendUnderscore) ; Loop through the queue and pass each item to the custom function.
+	Queue_ForEach($hQueue, AppendUnderscore) ; Randomise when to return True Or False. The false was break from the ForEach() function.
 
 	Local $aQueue = Queue_ToArray($hQueue) ; Create an array from the queue.
 	_ArrayDisplay($aQueue)
@@ -29,8 +30,9 @@ Func Example()
 	Queue_TrimToSize($hQueue) ; Decrease the memory footprint.
 EndFunc   ;==>Example
 
-Func AppendUnderscore($vItem)
-	Return $vItem & '_'
+Func AppendUnderscore(ByRef $vItem)
+	$vItem &= '_'
+	Return Random(0, 1, 1) ? True : False ; Randomise when to return True Or False. The false was break from the ForEach() function.
 EndFunc   ;==>AppendUnderscore
 
 ; Functions:
@@ -115,7 +117,7 @@ EndFunc   ;==>Queue_Count
 ; Description ...: Loop through the queue and pass each item/object to a custom function for processing.
 ; Syntax ........: Queue_ForEach(ByRef $aQueue, $hFunc)
 ; Parameters ....: $aQueue              - [in/out] Handle returned by Queue().
-;                  $hFunc               - A delegate to a function that has a single input and a return value.
+;                  $hFunc               - A delegate to a function that has a single ByRef input and a return value of either True (continue looping) or False (exit looping).
 ; Return values .: Success: True.
 ;				   Failure: None
 ; Author ........: guinness
@@ -124,7 +126,9 @@ EndFunc   ;==>Queue_Count
 Func Queue_ForEach(ByRef $aQueue, $hFunc)
 	If UBound($aQueue) >= $QUEUE_MAX And IsFunc($hFunc) Then
 		For $i = $aQueue[$QUEUE_FIRSTINDEX] + 1 To $aQueue[$QUEUE_LASTINDEX]
-			$aQueue[$i] = $hFunc($aQueue[$i])
+			If Not $hFunc($aQueue[$i]) Then
+				ExitLoop
+			EndIf
 		Next
 	EndIf
 	Return True
