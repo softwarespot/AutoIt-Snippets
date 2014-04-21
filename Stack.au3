@@ -23,6 +23,8 @@ Func Example()
 
 	Stack_ForEach($hStack, AppendUnderscore) ; Loop through the stack and pass each item to the custom function.
 
+	ConsoleWrite('Contains: ' & (Stack_ForEach($hStack, Contains) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
+
 	Local $aStack = Stack_ToArray($hStack) ; Create an array from the stack.
 	_ArrayDisplay($aStack)
 
@@ -34,6 +36,10 @@ Func AppendUnderscore(ByRef $vItem)
 	$vItem &= '_'
 	Return Random(0, 1, 1) ? True : False ; Randomise when to return True Or False. The false was break from the ForEach() function.
 EndFunc   ;==>AppendUnderscore
+
+Func Contains(ByRef $vItem)
+	Return $vItem == 'Example_150' ? False : True ; If found exit the loop by setting to False.
+EndFunc   ;==>Contains
 
 ; Functions:
 ; Stack - Create a stack handle.
@@ -118,20 +124,22 @@ EndFunc   ;==>Stack_Count
 ; Syntax ........: Stack_ForEach(ByRef $aStack, $hFunc)
 ; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
 ;                  $hFunc               - A delegate to a function that has a single ByRef input and a return value of either True (continue looping) or False (exit looping).
-; Return values .: Success: True.
-;				   Failure: None
+; Return values .: Success: Return value of either True or False from the delegate function.
+;				   Failure: Null
 ; Author ........: guinness
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_ForEach(ByRef $aStack, $hFunc)
+	Local $fReturn = Null
 	If UBound($aStack) >= $STACK_MAX And IsFunc($hFunc) Then
 		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
-			If Not $hFunc($aStack[$i]) Then
+			$fReturn = $hFunc($aStack[$i])
+			If Not $fReturn Then
 				ExitLoop
 			EndIf
 		Next
 	EndIf
-	Return True
+	Return $fReturn
 EndFunc   ;==>Stack_ForEach
 
 ; #FUNCTION# ====================================================================================================================

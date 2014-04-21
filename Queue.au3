@@ -23,6 +23,8 @@ Func Example()
 
 	Queue_ForEach($hQueue, AppendUnderscore) ; Randomise when to return True Or False. The false was break from the ForEach() function.
 
+	ConsoleWrite('Contains: ' & (Queue_ForEach($hQueue, Contains) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
+
 	Local $aQueue = Queue_ToArray($hQueue) ; Create an array from the queue.
 	_ArrayDisplay($aQueue)
 
@@ -34,6 +36,10 @@ Func AppendUnderscore(ByRef $vItem)
 	$vItem &= '_'
 	Return Random(0, 1, 1) ? True : False ; Randomise when to return True Or False. The false was break from the ForEach() function.
 EndFunc   ;==>AppendUnderscore
+
+Func Contains(ByRef $vItem)
+	Return $vItem == 'Example_150' ? False : True ; If found exit the loop by setting to False.
+EndFunc   ;==>Contains
 
 ; Functions:
 ; Queue - Create a queue handle.
@@ -118,20 +124,22 @@ EndFunc   ;==>Queue_Count
 ; Syntax ........: Queue_ForEach(ByRef $aQueue, $hFunc)
 ; Parameters ....: $aQueue              - [in/out] Handle returned by Queue().
 ;                  $hFunc               - A delegate to a function that has a single ByRef input and a return value of either True (continue looping) or False (exit looping).
-; Return values .: Success: True.
-;				   Failure: None
+; Return values .: Success: Return value of either True or False from the delegate function.
+;				   Failure: Null
 ; Author ........: guinness
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_ForEach(ByRef $aQueue, $hFunc)
+	Local $fReturn = Null
 	If UBound($aQueue) >= $QUEUE_MAX And IsFunc($hFunc) Then
 		For $i = $aQueue[$QUEUE_FIRSTINDEX] + 1 To $aQueue[$QUEUE_LASTINDEX]
-			If Not $hFunc($aQueue[$i]) Then
+			$fReturn = $hFunc($aQueue[$i])
+			If Not $fReturn Then
 				ExitLoop
 			EndIf
 		Next
 	EndIf
-	Return True
+	Return $fReturn
 EndFunc   ;==>Queue_ForEach
 
 ; #FUNCTION# ====================================================================================================================
