@@ -20,6 +20,8 @@ Func Example()
 
 	ConsoleWrite('Count: ' & Stack_Count($hStack) & @CRLF)
 
+	Stack_ForEach($hStack, AppendUnderscore) ; Loop through the stack and pass each item to the custom function.
+
 	Local $aStack = Stack_ToArray($hStack) ; Create an array from the stack.
 	_ArrayDisplay($aStack)
 
@@ -27,11 +29,16 @@ Func Example()
 	Stack_TrimExcess($hStack) ; Decrease the memory footprint.
 EndFunc   ;==>Example
 
+Func AppendUnderscore($vItem)
+	Return $vItem & '_'
+EndFunc   ;==>AppendUnderscore
+
 ; Functions:
 ; Stack - Create a stack handle.
 ; Stack_ToArray - Create an array from the stack.
 ; Stack_Clear - Remove all items/objects from the stack.
 ; Stack_Count - Retrieve the number of items/objects on the stack.
+; Stack_ForEach - Loop through the stack and pass each item/object to a custom function for processing.
 ; Stack_Peek - Peek at the item/object in the stack.
 ; Stack_Pop - Pop the last item/object from the stack.
 ; Stack_Push - Push an item/object to the stack.
@@ -102,6 +109,26 @@ EndFunc   ;==>Stack_Clear
 Func Stack_Count(ByRef $aStack)
 	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_COUNT] >= 0 ? $aStack[$STACK_COUNT] : 0
 EndFunc   ;==>Stack_Count
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: Stack_ForEach
+; Description ...: Loop through the stack and pass each item/object to a custom function for processing.
+; Syntax ........: Stack_ForEach(ByRef $aStack, $hFunc)
+; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
+;                  $hFunc               - A delegate to a function that has a single input and a return value.
+; Return values .: Success: True.
+;				   Failure: None
+; Author ........: guinness
+; Example .......: Yes
+; ===============================================================================================================================
+Func Stack_ForEach(ByRef $aStack, $hFunc)
+	If UBound($aStack) >= $STACK_MAX And IsFunc($hFunc) Then
+		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
+			$aStack[$i] = $hFunc($aStack[$i])
+		Next
+	EndIf
+	Return True
+EndFunc   ;==>Stack_ForEach
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Stack_Peek

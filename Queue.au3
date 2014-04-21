@@ -20,12 +20,18 @@ Func Example()
 
 	ConsoleWrite('Count: ' & Queue_Count($hQueue) & @CRLF)
 
+	Queue_ForEach($hQueue, AppendUnderscore) ; Loop through the queue and pass each item to the custom function.
+
 	Local $aQueue = Queue_ToArray($hQueue) ; Create an array from the queue.
 	_ArrayDisplay($aQueue)
 
 	Queue_Clear($hQueue) ; Clear the queue.
 	Queue_TrimToSize($hQueue) ; Decrease the memory footprint.
 EndFunc   ;==>Example
+
+Func AppendUnderscore($vItem)
+	Return $vItem & '_'
+EndFunc   ;==>AppendUnderscore
 
 ; Functions:
 ; Queue - Create a queue handle.
@@ -34,6 +40,7 @@ EndFunc   ;==>Example
 ; Queue_Count - Retrieve the number of items/objects on the queue.
 ; Queue_Dequeue - Pop the first item/object from the queue.
 ; Queue_Enqueue - Push an item/object to the queue.
+; Queue_ForEach - Loop through the queue and pass each item/object to a custom function for processing.
 ; Queue_Peek - Peek at the item/object in the queue.
 ; Queue_TrimToSize - Set the capacity to the number of items/objects in the queue.
 
@@ -102,6 +109,26 @@ EndFunc   ;==>Queue_Clear
 Func Queue_Count(ByRef $aQueue)
 	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_COUNT] >= 0 ? $aQueue[$QUEUE_COUNT] : 0
 EndFunc   ;==>Queue_Count
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: Queue_ForEach
+; Description ...: Loop through the queue and pass each item/object to a custom function for processing.
+; Syntax ........: Queue_ForEach(ByRef $aQueue, $hFunc)
+; Parameters ....: $aQueue              - [in/out] Handle returned by Queue().
+;                  $hFunc               - A delegate to a function that has a single input and a return value.
+; Return values .: Success: True.
+;				   Failure: None
+; Author ........: guinness
+; Example .......: Yes
+; ===============================================================================================================================
+Func Queue_ForEach(ByRef $aQueue, $hFunc)
+	If UBound($aQueue) >= $QUEUE_MAX And IsFunc($hFunc) Then
+		For $i = $aQueue[$QUEUE_FIRSTINDEX] + 1 To $aQueue[$QUEUE_LASTINDEX]
+			$aQueue[$i] = $hFunc($aQueue[$i])
+		Next
+	EndIf
+	Return True
+EndFunc   ;==>Queue_ForEach
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: Queue_Peek
@@ -212,3 +239,4 @@ Func __Queue($vQueue = Default, $fIsCopyObjects = False)
 	$vQueue = 0
 	Return $aQueue
 EndFunc   ;==>__Queue
+
