@@ -12,13 +12,21 @@ Func Example()
 	Local $hStopWatch = Stopwatch()
 	ConsoleWrite('IsRunning: ' & Stopwatch_IsRunning($hStopWatch) & @CRLF) ; Display running status.
 
+	ConsoleWrite('Started' & @CRLF)
 	Stopwatch_Start($hStopWatch) ; Start the stopwatch.
 	ConsoleWrite('IsRunning: ' & Stopwatch_IsRunning($hStopWatch) & @CRLF) ; Display running status.
 	Sleep(1000) ; Wait for 1 second.
 	Stopwatch_Stop($hStopWatch) ; Stop the stopwatch.
 	ConsoleWrite('Elapsed ms Time: ' & Stopwatch_ElapsedMilliseconds($hStopWatch) & @CRLF)
+	ConsoleWrite('Stopped.' & @CRLF)
 
+	ConsoleWrite('Waiting for 3 seconds whilst the stopwatch is stopped.' & @CRLF)
+	Sleep(3000) ; Wait for 3 seconds.
+
+	ConsoleWrite('Started' & @CRLF)
 	Stopwatch_Start($hStopWatch) ; Start the stopwatch again.
+
+	ConsoleWrite('Waiting for 2 seconds whilst the stopwatch is running' & @CRLF)
 	Sleep(2000) ; Wait for 2 seconds.
 
 	For $i = 1 To 10 ; The number of milliseconds is shown even when the stopwatch is running.
@@ -28,6 +36,7 @@ Func Example()
 
 	Stopwatch_Stop($hStopWatch) ; Stop the stopwatch.
 	ConsoleWrite('Elapsed ms Time: ' & Stopwatch_ElapsedMilliseconds($hStopWatch) & @CRLF) ; This should be about 5 seconds or so.
+	ConsoleWrite('Stopped' & @CRLF)
 
 	ConsoleWrite('IsRunning: ' & Stopwatch_IsRunning($hStopWatch) & @CRLF) ; Display running status.
 EndFunc   ;==>Example
@@ -37,14 +46,14 @@ Func Stopwatch()
 	Local $aStopwatch[$STOPWATCH_MAX]
 	Stopwatch_Reset($aStopwatch)
 	$aStopwatch[$STOPWATCH_FREQUENCY] = _WinAPI_QueryPerformanceFrequency()
-	If Not $aStopwatch[$STOPWATCH_FREQUENCY] Then
-		$aStopwatch[$STOPWATCH_ISHIGHRESOLUTION] = False
-		$aStopwatch[$STOPWATCH_FREQUENCY] = $STOPWATCH_TICKSPERSECOND
-		$aStopwatch[$STOPWATCH_TICKFREQUENCY] = 1
-	Else
+	If $aStopwatch[$STOPWATCH_FREQUENCY] > 0 Then
 		$aStopwatch[$STOPWATCH_ISHIGHRESOLUTION] = True
 		$aStopwatch[$STOPWATCH_TICKFREQUENCY] = $STOPWATCH_TICKSPERSECOND
 		$aStopwatch[$STOPWATCH_TICKFREQUENCY] /= $aStopwatch[$STOPWATCH_FREQUENCY]
+	Else
+		$aStopwatch[$STOPWATCH_ISHIGHRESOLUTION] = False
+		$aStopwatch[$STOPWATCH_FREQUENCY] = $STOPWATCH_TICKSPERSECOND
+		$aStopwatch[$STOPWATCH_TICKFREQUENCY] = 1
 	EndIf
 	$aStopwatch[$STOPWATCH_ID] = $STOPWATCH_GUID
 	Return $aStopwatch
