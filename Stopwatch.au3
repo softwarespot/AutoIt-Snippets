@@ -3,7 +3,7 @@
 #include <WinAPICom.au3>
 #include <WinAPISys.au3>
 
-Global Const $STOPWATCH_GUID = _WinAPI_CreateGUID(), $STOPWATCH_TICKSPERMILLISECOND = 10000, $STOPWATCH_TICKSPERSECOND = 10000000
+Global Const $STOPWATCH_GUID = _WinAPI_CreateGUID(), $STOPWATCH_TICKSPERMILLISECOND = 10000, $STOPWATCH_TICKSPERSECOND = $STOPWATCH_TICKSPERMILLISECOND * 1000
 Global Enum $STOPWATCH_TIMER, $STOPWATCH_RUNNING, $STOPWATCH_ELAPSED, $STOPWATCH_ISHIGHRESOLUTION, $STOPWATCH_FREQUENCY, $STOPWATCH_TICKFREQUENCY, $STOPWATCH_ID, $STOPWATCH_MAX
 
 Example()
@@ -51,19 +51,11 @@ Func Stopwatch()
 EndFunc   ;==>Stopwatch
 
 Func Stopwatch_ElapsedMilliseconds(ByRef $aStopwatch)
-	Local $iElapsedTime = 0
-	If __Stopwatch_IsStopwatch($aStopwatch) Then
-		$iElapsedTime = __Stopwatch_GetElapsedDateTimeTicks($aStopwatch) / $STOPWATCH_TICKSPERMILLISECOND
-	EndIf
-	Return $iElapsedTime
+	Return __Stopwatch_IsStopwatch($aStopwatch) ? __Stopwatch_GetElapsedDateTimeTicks($aStopwatch) / $STOPWATCH_TICKSPERMILLISECOND : 0
 EndFunc   ;==>Stopwatch_ElapsedMilliseconds
 
 Func Stopwatch_ElapsedTicks(ByRef $aStopwatch)
-	Local $iElapsedTime = 0
-	If __Stopwatch_IsStopwatch($aStopwatch) Then
-		$iElapsedTime = __Stopwatch_GetRawElapsedTicks($aStopwatch)
-	EndIf
-	Return $iElapsedTime
+	Return __Stopwatch_IsStopwatch($aStopwatch) ? __Stopwatch_GetElapsedDateTimeTicks($aStopwatch) : 0
 EndFunc   ;==>Stopwatch_ElapsedTicks
 
 Func Stopwatch_IsRunning(ByRef $aStopwatch)
@@ -110,13 +102,7 @@ Func Stopwatch_Stop(ByRef $aStopwatch)
 EndFunc   ;==>Stopwatch_Stop
 
 Func __Stopwatch_GetElapsedDateTimeTicks(ByRef $aStopwatch)
-	Local $iRawElapsedTime = __Stopwatch_GetRawElapsedTicks($aStopwatch)
-	If $aStopwatch[$STOPWATCH_ISHIGHRESOLUTION] Then
-		$iRawElapsedTime *= $aStopwatch[$STOPWATCH_TICKFREQUENCY]
-	Else
-		$iRawElapsedTime *= $STOPWATCH_TICKSPERMILLISECOND
-	EndIf
-	Return $iRawElapsedTime
+	Return __Stopwatch_GetRawElapsedTicks($aStopwatch) * ($aStopwatch[$STOPWATCH_ISHIGHRESOLUTION] ? $aStopwatch[$STOPWATCH_TICKFREQUENCY] : $STOPWATCH_TICKSPERMILLISECOND)
 EndFunc   ;==>__Stopwatch_GetElapsedDateTimeTicks
 
 Func __Stopwatch_GetRawElapsedTicks(ByRef $aStopwatch)
@@ -134,11 +120,7 @@ Func __Stopwatch_GetRawElapsedTicks(ByRef $aStopwatch)
 EndFunc   ;==>__Stopwatch_GetRawElapsedTicks
 
 Func __Stopwatch_GetTimestamp(ByRef $aStopwatch)
-	If $aStopwatch[$STOPWATCH_ISHIGHRESOLUTION] Then
-		Return _WinAPI_QueryPerformanceCounter()
-	Else
-		Return TimerInit()
-	EndIf
+	Return $aStopwatch[$STOPWATCH_ISHIGHRESOLUTION] ? _WinAPI_QueryPerformanceCounter() : TimerInit()
 EndFunc   ;==>__Stopwatch_GetTimestamp
 
 Func __Stopwatch_IsStopwatch(ByRef $aStopwatch) ; Internal function only.
