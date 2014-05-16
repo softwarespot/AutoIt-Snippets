@@ -44,6 +44,7 @@ EndFunc   ;==>Example
 ; Stopwatch Class: http://msdn.microsoft.com/en-us/library/system.diagnostics.stopwatch(v=vs.110).aspx
 Func Stopwatch()
 	Local $aStopwatch[$STOPWATCH_MAX]
+	$aStopwatch[$STOPWATCH_ID] = $STOPWATCH_GUID
 	Stopwatch_Reset($aStopwatch)
 	$aStopwatch[$STOPWATCH_FREQUENCY] = _WinAPI_QueryPerformanceFrequency()
 	If $aStopwatch[$STOPWATCH_FREQUENCY] > 0 Then
@@ -55,7 +56,6 @@ Func Stopwatch()
 		$aStopwatch[$STOPWATCH_FREQUENCY] = $STOPWATCH_TICKSPERSECOND
 		$aStopwatch[$STOPWATCH_TICKFREQUENCY] = 1
 	EndIf
-	$aStopwatch[$STOPWATCH_ID] = $STOPWATCH_GUID
 	Return $aStopwatch
 EndFunc   ;==>Stopwatch
 
