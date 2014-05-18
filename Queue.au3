@@ -1,7 +1,8 @@
 #AutoIt3Wrapper_Run_Au3Check=N
 #include <Array.au3>
 
-Global Enum $QUEUE_FIRSTINDEX, $QUEUE_LASTINDEX, $QUEUE_COUNT, $QUEUE_UBOUND, $QUEUE_MAX
+Global Const $QUEUE_GUID = '4CCFFC82-DE64-11E3-9D78-047274EB0A54'
+Global Enum $QUEUE_FIRSTINDEX, $QUEUE_LASTINDEX, $QUEUE_COUNT, $QUEUE_ID, $QUEUE_UBOUND, $QUEUE_MAX
 
 Example()
 
@@ -24,7 +25,8 @@ Func Example()
 
 	Queue_ForEach($hQueue, AppendUnderscore) ; Loop through the stack and pass each item to the custom function.
 
-	ConsoleWrite('Contains: ' & (Queue_ForEach($hQueue, Contains) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
+	ConsoleWrite('Contains Example_150: ' & (Queue_ForEach($hQueue, Contains_150) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
+	ConsoleWrite('Contains Example_1000: ' & (Queue_ForEach($hQueue, Contains_1000) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
 
 	Local $aQueue = Queue_ToArray($hQueue) ; Create an array from the queue.
 	_ArrayDisplay($aQueue)
@@ -38,9 +40,13 @@ Func AppendUnderscore(ByRef $vItem)
 	Return Random(0, 1, 1) ? True : False ; Randomise when to return True Or False. The false was break from the ForEach() function.
 EndFunc   ;==>AppendUnderscore
 
-Func Contains(ByRef $vItem)
+Func Contains_150(ByRef $vItem)
 	Return $vItem == 'Example_150' ? False : True ; If found exit the loop by setting to False.
-EndFunc   ;==>Contains
+EndFunc   ;==>Contains_150
+
+Func Contains_1000(ByRef $vItem)
+	Return $vItem == 'Example_1000' ? False : True ; If found exit the loop by setting to False.
+EndFunc   ;==>Contains_1000
 
 ; Functions:
 ; Queue - Create a queue handle.
@@ -79,7 +85,7 @@ EndFunc   ;==>Queue
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_ToArray(ByRef $aQueue)
-	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_COUNT] Then
+	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID And $aQueue[$QUEUE_COUNT] Then
 		Local $aArray[$aQueue[$QUEUE_COUNT]]
 		Local $j = 0
 		For $i = $aQueue[$QUEUE_FIRSTINDEX] + 1 To $aQueue[$QUEUE_LASTINDEX]
@@ -102,7 +108,7 @@ EndFunc   ;==>Queue_ToArray
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Capacity(ByRef $aQueue)
-	Return UBound($aQueue) >= $QUEUE_MAX ? $aQueue[$QUEUE_UBOUND] - ($aQueue[$QUEUE_FIRSTINDEX] > $QUEUE_MAX ? $aQueue[$QUEUE_FIRSTINDEX] : $QUEUE_MAX) : 0
+	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID ? $aQueue[$QUEUE_UBOUND] - ($aQueue[$QUEUE_FIRSTINDEX] > $QUEUE_MAX ? $aQueue[$QUEUE_FIRSTINDEX] : $QUEUE_MAX) : 0
 EndFunc   ;==>Queue_Capacity
 
 ; #FUNCTION# ====================================================================================================================
@@ -131,7 +137,7 @@ EndFunc   ;==>Queue_Clear
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Count(ByRef $aQueue)
-	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_COUNT] >= 0 ? $aQueue[$QUEUE_COUNT] : 0
+	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID And $aQueue[$QUEUE_COUNT] >= 0 ? $aQueue[$QUEUE_COUNT] : 0
 EndFunc   ;==>Queue_Count
 
 ; #FUNCTION# ====================================================================================================================
@@ -147,7 +153,7 @@ EndFunc   ;==>Queue_Count
 ; ===============================================================================================================================
 Func Queue_ForEach(ByRef $aQueue, $hFunc)
 	Local $fReturn = Null
-	If UBound($aQueue) >= $QUEUE_MAX And IsFunc($hFunc) Then
+	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID And IsFunc($hFunc) Then
 		For $i = $aQueue[$QUEUE_FIRSTINDEX] + 1 To $aQueue[$QUEUE_LASTINDEX]
 			$fReturn = $hFunc($aQueue[$i])
 			If Not $fReturn Then
@@ -169,7 +175,7 @@ EndFunc   ;==>Queue_ForEach
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Peek(ByRef $aQueue)
-	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_FIRSTINDEX] >= $QUEUE_MAX ? $aQueue[$aQueue[$QUEUE_FIRSTINDEX] + 1] : SetError(1, 0, Null)
+	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID And $aQueue[$QUEUE_FIRSTINDEX] >= $QUEUE_MAX ? $aQueue[$aQueue[$QUEUE_FIRSTINDEX] + 1] : SetError(1, 0, Null)
 EndFunc   ;==>Queue_Peek
 
 ; #FUNCTION# ====================================================================================================================
@@ -183,7 +189,7 @@ EndFunc   ;==>Queue_Peek
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Dequeue(ByRef $aQueue)
-	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_LASTINDEX] >= $QUEUE_MAX Then
+	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID And $aQueue[$QUEUE_LASTINDEX] >= $QUEUE_MAX Then
 		$aQueue[$QUEUE_FIRSTINDEX] += 1
 		$aQueue[$QUEUE_COUNT] -= 1 ; Decrease the count.
 		Local $vData = $aQueue[$aQueue[$QUEUE_FIRSTINDEX]] ; Save the queue item/object.
@@ -208,7 +214,7 @@ EndFunc   ;==>Queue_Dequeue
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Enqueue(ByRef $aQueue, $vData)
-	If UBound($aQueue) >= $QUEUE_MAX Then
+	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID Then
 		$aQueue[$QUEUE_LASTINDEX] += 1 ; Increase the queue by 1.
 		$aQueue[$QUEUE_COUNT] += 1 ; Increase the count.
 		If $aQueue[$QUEUE_LASTINDEX] >= $aQueue[$QUEUE_UBOUND] Then ; ReDim the internal queue array if required.
@@ -246,13 +252,14 @@ EndFunc   ;==>Queue_TrimToSize
 ; Author ........: guinness
 ; ===============================================================================================================================
 Func __Queue($vQueue = Default, $fIsCopyObjects = False)
-	Local $iCount = (UBound($vQueue) >= $QUEUE_MAX) ? $vQueue[$QUEUE_COUNT] : ((IsInt($vQueue) And $vQueue > 0) ? $vQueue : 0)
+	Local $iCount = (UBound($vQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID) ? $vQueue[$QUEUE_COUNT] : ((IsInt($vQueue) And $vQueue > 0) ? $vQueue : 0)
 
 	Local $iUBound = $QUEUE_MAX + (($iCount) > 0 ? $iCount : 4) ; QUEUE_INITIAL_SIZE
 	Local $aQueue[$iUBound]
 	$aQueue[$QUEUE_FIRSTINDEX] = $QUEUE_MAX - 1
 	$aQueue[$QUEUE_LASTINDEX] = $QUEUE_MAX - 1
 	$aQueue[$QUEUE_COUNT] = 0
+	$aQueue[$QUEUE_ID] = $QUEUE_GUID
 	$aQueue[$QUEUE_UBOUND] = $iUBound
 
 	If $fIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.

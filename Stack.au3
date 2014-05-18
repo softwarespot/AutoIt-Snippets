@@ -1,7 +1,8 @@
 #AutoIt3Wrapper_Run_Au3Check=N
 #include <Array.au3>
 
-Global Enum $STACK_INDEX, $STACK_COUNT, $STACK_UBOUND, $STACK_MAX
+Global Const $STACK_GUID = '40927D46-DE64-11E3-A054-047274EB0A54'
+Global Enum $STACK_INDEX, $STACK_COUNT, $STACK_ID, $STACK_UBOUND, $STACK_MAX
 
 Example()
 
@@ -24,7 +25,8 @@ Func Example()
 
 	Stack_ForEach($hStack, AppendUnderscore) ; Loop through the stack and pass each item to the custom function.
 
-	ConsoleWrite('Contains: ' & (Stack_ForEach($hStack, Contains) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
+	ConsoleWrite('Contains Example_150: ' & (Stack_ForEach($hStack, Contains_150) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
+	ConsoleWrite('Contains Example_1000: ' & (Stack_ForEach($hStack, Contains_1000) = False) & @CRLF) ; It will return False if found so as to exit the ForEach() loop, hence why False is compared
 
 	Local $aStack = Stack_ToArray($hStack) ; Create an array from the stack.
 	_ArrayDisplay($aStack)
@@ -38,9 +40,13 @@ Func AppendUnderscore(ByRef $vItem)
 	Return Random(0, 1, 1) ? True : False ; Randomise when to return True Or False. The false was break from the ForEach() function.
 EndFunc   ;==>AppendUnderscore
 
-Func Contains(ByRef $vItem)
+Func Contains_150(ByRef $vItem)
 	Return $vItem == 'Example_150' ? False : True ; If found exit the loop by setting to False.
-EndFunc   ;==>Contains
+EndFunc   ;==>Contains_150
+
+Func Contains_1000(ByRef $vItem)
+	Return $vItem == 'Example_1000' ? False : True ; If found exit the loop by setting to False.
+EndFunc   ;==>Contains_1000
 
 ; Functions:
 ; Stack - Create a stack handle.
@@ -79,7 +85,7 @@ EndFunc   ;==>Stack
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_ToArray(ByRef $aStack)
-	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_COUNT] Then
+	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And $aStack[$STACK_COUNT] Then
 		Local $aArray[$aStack[$STACK_COUNT]]
 		Local $j = $aStack[$STACK_COUNT] - 1
 		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
@@ -102,7 +108,7 @@ EndFunc   ;==>Stack_ToArray
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Capacity(ByRef $aStack)
-	Return UBound($aStack) >= $STACK_MAX ? $aStack[$STACK_UBOUND] - $STACK_MAX : 0
+	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID ? $aStack[$STACK_UBOUND] - $STACK_MAX : 0
 EndFunc   ;==>Stack_Capacity
 
 ; #FUNCTION# ====================================================================================================================
@@ -131,7 +137,7 @@ EndFunc   ;==>Stack_Clear
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Count(ByRef $aStack)
-	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_COUNT] >= 0 ? $aStack[$STACK_COUNT] : 0
+	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And $aStack[$STACK_COUNT] >= 0 ? $aStack[$STACK_COUNT] : 0
 EndFunc   ;==>Stack_Count
 
 ; #FUNCTION# ====================================================================================================================
@@ -147,7 +153,7 @@ EndFunc   ;==>Stack_Count
 ; ===============================================================================================================================
 Func Stack_ForEach(ByRef $aStack, $hFunc)
 	Local $fReturn = Null
-	If UBound($aStack) >= $STACK_MAX And IsFunc($hFunc) Then
+	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And IsFunc($hFunc) Then
 		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
 			$fReturn = $hFunc($aStack[$i])
 			If Not $fReturn Then
@@ -169,7 +175,7 @@ EndFunc   ;==>Stack_ForEach
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Peek(ByRef $aStack)
-	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_INDEX] >= $STACK_MAX ? $aStack[$aStack[$STACK_INDEX]] : SetError(1, 0, Null)
+	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And $aStack[$STACK_INDEX] >= $STACK_MAX ? $aStack[$aStack[$STACK_INDEX]] : SetError(1, 0, Null)
 EndFunc   ;==>Stack_Peek
 
 ; #FUNCTION# ====================================================================================================================
@@ -183,7 +189,7 @@ EndFunc   ;==>Stack_Peek
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Pop(ByRef $aStack)
-	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_INDEX] >= $STACK_MAX Then
+	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And $aStack[$STACK_INDEX] >= $STACK_MAX Then
 		$aStack[$STACK_COUNT] -= 1 ; Decrease the count.
 		Local $vData = $aStack[$aStack[$STACK_INDEX]] ; Save the stack item/object.
 		$aStack[$aStack[$STACK_INDEX]] = Null ; Set to null.
@@ -208,7 +214,7 @@ EndFunc   ;==>Stack_Pop
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Push(ByRef $aStack, $vData)
-	If UBound($aStack) >= $STACK_MAX Then
+	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID Then
 		$aStack[$STACK_INDEX] += 1 ; Increase the stack by 1.
 		$aStack[$STACK_COUNT] += 1 ; Increase the count.
 		If $aStack[$STACK_INDEX] >= $aStack[$STACK_UBOUND] Then ; ReDim the internal stack array if required.
@@ -246,12 +252,13 @@ EndFunc   ;==>Stack_TrimExcess
 ; Author ........: guinness
 ; ===============================================================================================================================
 Func __Stack($vStack = Default, $fIsCopyObjects = False)
-	Local $iCount = (UBound($vStack) >= $STACK_MAX) ? $vStack[$STACK_COUNT] : ((IsInt($vStack) And $vStack > 0) ? $vStack : 0)
+	Local $iCount = (UBound($vStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID) ? $vStack[$STACK_COUNT] : ((IsInt($vStack) And $vStack > 0) ? $vStack : 0)
 
 	Local $iUBound = $STACK_MAX + (($iCount) > 0 ? $iCount : 4) ; STACK_INITIAL_SIZE
 	Local $aStack[$iUBound]
 	$aStack[$STACK_INDEX] = $STACK_MAX - 1
 	$aStack[$STACK_COUNT] = 0
+	$aStack[$STACK_ID] = $STACK_GUID
 	$aStack[$STACK_UBOUND] = $iUBound
 
 	If $fIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
