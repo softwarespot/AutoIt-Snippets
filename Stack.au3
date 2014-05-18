@@ -252,7 +252,7 @@ EndFunc   ;==>Stack_TrimExcess
 ; Author ........: guinness
 ; ===============================================================================================================================
 Func __Stack($vStack = Default, $fIsCopyObjects = False)
-	Local $iCount = (UBound($vStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID) ? $vStack[$STACK_COUNT] : ((IsInt($vStack) And $vStack > 0) ? $vStack : 0)
+	Local $iCount = (UBound($vStack) >= $STACK_MAX And $vStack[$STACK_ID] = $STACK_GUID) ? $vStack[$STACK_COUNT] : ((IsInt($vStack) And $vStack > 0) ? $vStack : 0)
 
 	Local $iUBound = $STACK_MAX + (($iCount) > 0 ? $iCount : 4) ; STACK_INITIAL_SIZE
 	Local $aStack[$iUBound]

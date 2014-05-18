@@ -252,7 +252,7 @@ EndFunc   ;==>Queue_TrimToSize
 ; Author ........: guinness
 ; ===============================================================================================================================
 Func __Queue($vQueue = Default, $fIsCopyObjects = False)
-	Local $iCount = (UBound($vQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID) ? $vQueue[$QUEUE_COUNT] : ((IsInt($vQueue) And $vQueue > 0) ? $vQueue : 0)
+	Local $iCount = (UBound($vQueue) >= $QUEUE_MAX And $vQueue[$QUEUE_ID] = $QUEUE_GUID) ? $vQueue[$QUEUE_COUNT] : ((IsInt($vQueue) And $vQueue > 0) ? $vQueue : 0)
 
 	Local $iUBound = $QUEUE_MAX + (($iCount) > 0 ? $iCount : 4) ; QUEUE_INITIAL_SIZE
 	Local $aQueue[$iUBound]
