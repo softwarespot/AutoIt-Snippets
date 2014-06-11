@@ -1,4 +1,3 @@
-#AutoIt3Wrapper_Run_Au3Check=N
 #include <Array.au3>
 
 Global Const $QUEUE_GUID = '4CCFFC82-DE64-11E3-9D78-047274EB0A54'

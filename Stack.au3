@@ -1,4 +1,3 @@
-#AutoIt3Wrapper_Run_Au3Check=N
 #include <Array.au3>
 
 Global Const $STACK_GUID = '40927D46-DE64-11E3-A054-047274EB0A54'
