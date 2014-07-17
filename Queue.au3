@@ -153,16 +153,16 @@ EndFunc   ;==>Queue_Count
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_ForEach(ByRef $aQueue, $hFunc)
-	Local $fReturn = Null
+	Local $bReturn = Null
 	If UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID And IsFunc($hFunc) Then
 		For $i = $aQueue[$QUEUE_FIRSTINDEX] + 1 To $aQueue[$QUEUE_LASTINDEX]
-			$fReturn = $hFunc($aQueue[$i])
-			If Not $fReturn Then
+			$bReturn = $hFunc($aQueue[$i])
+			If Not $bReturn Then
 				ExitLoop
 			EndIf
 		Next
 	EndIf
-	Return $fReturn
+	Return $bReturn
 EndFunc   ;==>Queue_ForEach
 
 ; #FUNCTION# ====================================================================================================================
@@ -246,13 +246,13 @@ EndFunc   ;==>Queue_TrimToSize
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __Queue
 ; Description ...: Create a new queue object or re-size a current queue object.
-; Syntax ........: __Queue([$vQueue = Default[, $fIsCopyObjects = Default]])
+; Syntax ........: __Queue([$vQueue = Default[, $bIsCopyObjects = Default]])
 ; Parameters ....: $vQueue              - [optional] A variant value of either Default or queue object. Default is Default.
-;                  $fIsCopyObjects      - [optional] Copy the previous queue items/objects. Default is False
+;                  $bIsCopyObjects      - [optional] Copy the previous queue items/objects. Default is False
 ; Return values .: New queue object.
 ; Author ........: guinness
 ; ===============================================================================================================================
-Func __Queue($vQueue = Default, $fIsCopyObjects = False)
+Func __Queue($vQueue = Default, $bIsCopyObjects = False)
 	Local $iCount = (UBound($vQueue) >= $QUEUE_MAX And $vQueue[$QUEUE_ID] = $QUEUE_GUID) ? $vQueue[$QUEUE_COUNT] : ((IsInt($vQueue) And $vQueue > 0) ? $vQueue : 0)
 
 	Local $iUBound = $QUEUE_MAX + (($iCount) > 0 ? $iCount : 4) ; QUEUE_INITIAL_SIZE
@@ -263,7 +263,7 @@ Func __Queue($vQueue = Default, $fIsCopyObjects = False)
 	$aQueue[$QUEUE_ID] = $QUEUE_GUID
 	$aQueue[$QUEUE_UBOUND] = $iUBound
 
-	If $fIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
+	If $bIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
 		$aQueue[$QUEUE_LASTINDEX] = $QUEUE_MAX - 1 + $iCount
 		$aQueue[$QUEUE_COUNT] = $iCount
 

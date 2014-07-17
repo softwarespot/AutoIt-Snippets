@@ -153,16 +153,16 @@ EndFunc   ;==>Stack_Count
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_ForEach(ByRef $aStack, $hFunc)
-	Local $fReturn = Null
+	Local $bReturn = Null
 	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And IsFunc($hFunc) Then
 		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
-			$fReturn = $hFunc($aStack[$i])
-			If Not $fReturn Then
+			$bReturn = $hFunc($aStack[$i])
+			If Not $bReturn Then
 				ExitLoop
 			EndIf
 		Next
 	EndIf
-	Return $fReturn
+	Return $bReturn
 EndFunc   ;==>Stack_ForEach
 
 ; #FUNCTION# ====================================================================================================================
@@ -246,13 +246,13 @@ EndFunc   ;==>Stack_TrimExcess
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __Stack
 ; Description ...: Create a new stack object or re-size a current stack object.
-; Syntax ........: __Stack([$vStack = Default[, $fIsCopyObjects = Default]])
+; Syntax ........: __Stack([$vStack = Default[, $bIsCopyObjects = Default]])
 ; Parameters ....: $vStack              - [optional] A variant value of either Default or stack object. Default is Default.
-;                  $fIsCopyObjects      - [optional] Copy the previous stack items/objects. Default is False
+;                  $bIsCopyObjects      - [optional] Copy the previous stack items/objects. Default is False
 ; Return values .: New stack object.
 ; Author ........: guinness
 ; ===============================================================================================================================
-Func __Stack($vStack = Default, $fIsCopyObjects = False)
+Func __Stack($vStack = Default, $bIsCopyObjects = False)
 	Local $iCount = (UBound($vStack) >= $STACK_MAX And $vStack[$STACK_ID] = $STACK_GUID) ? $vStack[$STACK_COUNT] : ((IsInt($vStack) And $vStack > 0) ? $vStack : 0)
 
 	Local $iUBound = $STACK_MAX + (($iCount) > 0 ? $iCount : 4) ; STACK_INITIAL_SIZE
@@ -262,7 +262,7 @@ Func __Stack($vStack = Default, $fIsCopyObjects = False)
 	$aStack[$STACK_ID] = $STACK_GUID
 	$aStack[$STACK_UBOUND] = $iUBound
 
-	If $fIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
+	If $bIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
 		$aStack[$STACK_INDEX] = $STACK_MAX - 1 + $iCount
 		$aStack[$STACK_COUNT] = $iCount
 
