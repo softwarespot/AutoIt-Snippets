@@ -1,7 +1,8 @@
-#include <Array.au3>
-
-Global Const $STACK_GUID = '40927D46-DE64-11E3-A054-047274EB0A54'
+Global Const $STACK_GUID = '736DBB18-0DF3-11E4-807A-B46DECBA0006'
 Global Enum $STACK_INDEX, $STACK_COUNT, $STACK_ID, $STACK_UBOUND, $STACK_MAX
+
+#Region Example
+#include <Array.au3>
 
 Example()
 
@@ -36,16 +37,17 @@ EndFunc   ;==>Example
 
 Func AppendUnderscore(ByRef $vItem)
 	$vItem &= '_'
-	Return Random(0, 1, 1) ? True : False ; Randomise when to return True Or False. The false was break from the ForEach() function.
+	Return (Random(0, 1, 1) ? True : False) ; Randomise when to return True Or False. The false was break from the ForEach() function.
 EndFunc   ;==>AppendUnderscore
 
 Func Contains_150(ByRef $vItem)
-	Return $vItem == 'Example_150' ? False : True ; If found exit the loop by setting to False.
+	Return ($vItem == 'Example_150' ? False : True) ; If found exit the loop by setting to False.
 EndFunc   ;==>Contains_150
 
 Func Contains_1000(ByRef $vItem)
-	Return $vItem == 'Example_1000' ? False : True ; If found exit the loop by setting to False.
+	Return ($vItem == 'Example_1000' ? False : True) ; If found exit the loop by setting to False.
 EndFunc   ;==>Contains_1000
+#EndRegion Example
 
 ; Functions:
 ; Stack - Create a stack handle.
@@ -107,7 +109,7 @@ EndFunc   ;==>Stack_ToArray
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Capacity(ByRef $aStack)
-	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID ? $aStack[$STACK_UBOUND] - $STACK_MAX : 0
+	Return (UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID ? $aStack[$STACK_UBOUND] - $STACK_MAX : 0)
 EndFunc   ;==>Stack_Capacity
 
 ; #FUNCTION# ====================================================================================================================

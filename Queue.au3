@@ -1,7 +1,8 @@
-#include <Array.au3>
-
-Global Const $QUEUE_GUID = '4CCFFC82-DE64-11E3-9D78-047274EB0A54'
+Global Const $QUEUE_GUID = 'BB09E988-0DF3-11E4-846E-B46DECBA0006'
 Global Enum $QUEUE_FIRSTINDEX, $QUEUE_LASTINDEX, $QUEUE_COUNT, $QUEUE_ID, $QUEUE_UBOUND, $QUEUE_MAX
+
+#Region Example
+#include <Array.au3>
 
 Example()
 
@@ -36,16 +37,17 @@ EndFunc   ;==>Example
 
 Func AppendUnderscore(ByRef $vItem)
 	$vItem &= '_'
-	Return Random(0, 1, 1) ? True : False ; Randomise when to return True Or False. The false was break from the ForEach() function.
+	Return (Random(0, 1, 1) ? True : False) ; Randomise when to return True Or False. The false was break from the ForEach() function.
 EndFunc   ;==>AppendUnderscore
 
 Func Contains_150(ByRef $vItem)
-	Return $vItem == 'Example_150' ? False : True ; If found exit the loop by setting to False.
+	Return ($vItem == 'Example_150' ? False : True) ; If found exit the loop by setting to False.
 EndFunc   ;==>Contains_150
 
 Func Contains_1000(ByRef $vItem)
-	Return $vItem == 'Example_1000' ? False : True ; If found exit the loop by setting to False.
+	Return ($vItem == 'Example_1000' ? False : True) ; If found exit the loop by setting to False.
 EndFunc   ;==>Contains_1000
+#EndRegion Example
 
 ; Functions:
 ; Queue - Create a queue handle.
@@ -107,7 +109,7 @@ EndFunc   ;==>Queue_ToArray
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Queue_Capacity(ByRef $aQueue)
-	Return UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID ? $aQueue[$QUEUE_UBOUND] - ($aQueue[$QUEUE_FIRSTINDEX] > $QUEUE_MAX ? $aQueue[$QUEUE_FIRSTINDEX] : $QUEUE_MAX) : 0
+	Return (UBound($aQueue) >= $QUEUE_MAX And $aQueue[$QUEUE_ID] = $QUEUE_GUID ? $aQueue[$QUEUE_UBOUND] - ($aQueue[$QUEUE_FIRSTINDEX] > $QUEUE_MAX ? $aQueue[$QUEUE_FIRSTINDEX] : $QUEUE_MAX) : 0)
 EndFunc   ;==>Queue_Capacity
 
 ; #FUNCTION# ====================================================================================================================
