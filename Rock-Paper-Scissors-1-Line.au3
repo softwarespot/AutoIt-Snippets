@@ -1,5 +1,5 @@
 #AutoIt3Wrapper_Run_Au3Check=N
-Local $aAnswers[] = [Int(InputBox("Paper, Rock, Scissors by guinness (c) 2014", "1 = Rock, 2 = Paper, 3 = Scissors")), _ ; On one line, though split for easy reading.
+Local $aAnswers = [Int(InputBox("Paper, Rock, Scissors by guinness (c) 2014", "1 = Rock, 2 = Paper, 3 = Scissors")), _ ; On one line, though split for easy reading.
 		"Rock", "Paper", "Scissors", Int(Random(1, 3, 1)), _
 		MsgBox(4096, "Paper, Rock, Scissors by guinness (c) 2014", _
 		((StringRegExp($aAnswers[0], "^[123]{1}$") = 0) ? "Please enter a valid value next time." : _
