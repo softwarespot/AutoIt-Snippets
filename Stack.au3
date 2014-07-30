@@ -1,5 +1,5 @@
 Global Const $STACK_GUID = '736DBB18-0DF3-11E4-807A-B46DECBA0006'
-Global Enum $STACK_INDEX, $STACK_COUNT, $STACK_ID, $STACK_UBOUND, $STACK_MAX
+Global Enum $STACK_COUNT, $STACK_ID, $STACK_INDEX, $STACK_UBOUND, $STACK_MAX
 
 #Region Example
 #include <Array.au3>
@@ -72,7 +72,9 @@ EndFunc   ;==>Contains_1000
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack($iInitialSize = Default)
-	Return __Stack($iInitialSize, False)
+	Local $aStack = 0
+	__Stack($aStack, $iInitialSize, False)
+	Return $aStack
 EndFunc   ;==>Stack
 
 ; #FUNCTION# ====================================================================================================================
@@ -86,7 +88,7 @@ EndFunc   ;==>Stack
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_ToArray(ByRef $aStack)
-	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And $aStack[$STACK_COUNT] Then
+	If __Stack_IsAPI($aStack) And $aStack[$STACK_COUNT] > 0 Then
 		Local $aArray[$aStack[$STACK_COUNT]]
 		Local $j = $aStack[$STACK_COUNT] - 1
 		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
@@ -104,12 +106,12 @@ EndFunc   ;==>Stack_ToArray
 ; Syntax ........: Stack_Capacity(ByRef $aStack)
 ; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
 ; Return values .: Success: Capacity of the internal stack.
-;				   Failure: None
+;				   Failure: None.
 ; Author ........: guinness
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Capacity(ByRef $aStack)
-	Return (UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID ? $aStack[$STACK_UBOUND] - $STACK_MAX : 0)
+	Return (__Stack_IsAPI($aStack) ? $aStack[$STACK_UBOUND] - $STACK_MAX : 0)
 EndFunc   ;==>Stack_Capacity
 
 ; #FUNCTION# ====================================================================================================================
@@ -117,14 +119,13 @@ EndFunc   ;==>Stack_Capacity
 ; Description ...: Remove all items/objects from the stack.
 ; Syntax ........: Stack_Clear(ByRef $aStack)
 ; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
-; Return values .: Success: Items/objects removed from the stack.
-;				   Failure: None
+; Return values .: Success: True.
+;				   Failure: None.
 ; Author ........: guinness
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Clear(ByRef $aStack)
-	$aStack = __Stack($aStack, False)
-	Return True
+	Return __Stack($aStack, Null, False)
 EndFunc   ;==>Stack_Clear
 
 ; #FUNCTION# ====================================================================================================================
@@ -133,12 +134,12 @@ EndFunc   ;==>Stack_Clear
 ; Syntax ........: Stack_Count(ByRef $aStack)
 ; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
 ; Return values .: Success: Count of the items/objects on the stack.
-;				   Failure: None
+;				   Failure: None.
 ; Author ........: guinness
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Count(ByRef $aStack)
-	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And $aStack[$STACK_COUNT] >= 0 ? $aStack[$STACK_COUNT] : 0
+	Return (__Stack_IsAPI($aStack) And $aStack[$STACK_COUNT] >= 0 ? $aStack[$STACK_COUNT] : 0)
 EndFunc   ;==>Stack_Count
 
 ; #FUNCTION# ====================================================================================================================
@@ -154,7 +155,7 @@ EndFunc   ;==>Stack_Count
 ; ===============================================================================================================================
 Func Stack_ForEach(ByRef $aStack, $hFunc)
 	Local $bReturn = Null
-	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And IsFunc($hFunc) Then
+	If __Stack_IsAPI($aStack) And IsFunc($hFunc) Then
 		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
 			$bReturn = $hFunc($aStack[$i])
 			If Not $bReturn Then
@@ -176,7 +177,7 @@ EndFunc   ;==>Stack_ForEach
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Peek(ByRef $aStack)
-	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And $aStack[$STACK_INDEX] >= $STACK_MAX ? $aStack[$aStack[$STACK_INDEX]] : SetError(1, 0, Null)
+	Return __Stack_IsAPI($aStack) And $aStack[$STACK_INDEX] >= $STACK_MAX ? $aStack[$aStack[$STACK_INDEX]] : SetError(1, 0, Null)
 EndFunc   ;==>Stack_Peek
 
 ; #FUNCTION# ====================================================================================================================
@@ -190,13 +191,13 @@ EndFunc   ;==>Stack_Peek
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Pop(ByRef $aStack)
-	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID And $aStack[$STACK_INDEX] >= $STACK_MAX Then
+	If __Stack_IsAPI($aStack) And $aStack[$STACK_INDEX] >= $STACK_MAX Then
 		$aStack[$STACK_COUNT] -= 1 ; Decrease the count.
 		Local $vData = $aStack[$aStack[$STACK_INDEX]] ; Save the stack item/object.
 		$aStack[$aStack[$STACK_INDEX]] = Null ; Set to null.
 		$aStack[$STACK_INDEX] -= 1 ; Decrease the index by 1.
 		; If ($aStack[$STACK_UBOUND] - $aStack[$STACK_INDEX]) > 15 Then ; If there are too many blank rows then re-size the stack.
-		; $aStack = __Stack($aStack, True)
+		; __Stack($aStack, Null, True)
 		; EndIf
 		Return $vData
 	EndIf
@@ -210,12 +211,14 @@ EndFunc   ;==>Stack_Pop
 ; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
 ;                  $vData               - Item/object.
 ; Return values .: Success: True.
-;				   Failure: Sets @error to non-zero and returns Null.
+;				   Failure: False.
 ; Author ........: guinness
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_Push(ByRef $aStack, $vData)
-	If UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID Then
+	Local $bReturn = False
+	If __Stack_IsAPI($aStack) Then
+		$bReturn = True
 		$aStack[$STACK_INDEX] += 1 ; Increase the stack by 1.
 		$aStack[$STACK_COUNT] += 1 ; Increase the count.
 		If $aStack[$STACK_INDEX] >= $aStack[$STACK_UBOUND] Then ; ReDim the internal stack array if required.
@@ -223,9 +226,8 @@ Func Stack_Push(ByRef $aStack, $vData)
 			ReDim $aStack[$aStack[$STACK_UBOUND]]
 		EndIf
 		$aStack[$aStack[$STACK_INDEX]] = $vData ; Set the stack element.
-		Return True
 	EndIf
-	Return SetError(1, 0, Null)
+	Return $bReturn
 EndFunc   ;==>Stack_Push
 
 ; #FUNCTION# ====================================================================================================================
@@ -234,40 +236,56 @@ EndFunc   ;==>Stack_Push
 ; Syntax ........: Stack_TrimExcess(ByRef $aStack)
 ; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
 ; Return values .: Success: True.
-;				   Failure: None
+;				   Failure: None.
 ; Author ........: guinness
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func Stack_TrimExcess(ByRef $aStack)
-	$aStack = __Stack($aStack, True)
-	Return True
+	Return __Stack($aStack, Null, True)
 EndFunc   ;==>Stack_TrimExcess
 
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
 ; Name ..........: __Stack
-; Description ...: Create a new stack object or re-size a current stack object.
-; Syntax ........: __Stack([$vStack = Default[, $bIsCopyObjects = Default]])
-; Parameters ....: $vStack              - [optional] A variant value of either Default or stack object. Default is Default.
-;                  $bIsCopyObjects      - [optional] Copy the previous stack items/objects. Default is False
-; Return values .: New stack object.
+; Description ...:Create a new stack object or re-size a current stack object.
+; Syntax ........: __Stack(ByRef $aStack, $iInitialSize, $bIsCopyObjects)
+; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
+;                  $iInitialSize        - Initial size value.
+;                  $bIsCopyObjects      - Copy the previous stack items/objects.
+; Return values .: True
 ; Author ........: guinness
 ; ===============================================================================================================================
-Func __Stack($vStack = Default, $bIsCopyObjects = False)
-	Local $iCount = (UBound($vStack) >= $STACK_MAX And $vStack[$STACK_ID] = $STACK_GUID) ? $vStack[$STACK_COUNT] : ((IsInt($vStack) And $vStack > 0) ? $vStack : 0)
+Func __Stack(ByRef $aStack, $iInitialSize, $bIsCopyObjects)
+	Local $iCount = (__Stack_IsAPI($aStack) ? $aStack[$STACK_COUNT] : ((IsInt($iInitialSize) And $iInitialSize > 0) ? $iInitialSize : 0))
 
-	Local $iUBound = $STACK_MAX + (($iCount) > 0 ? $iCount : 4) ; STACK_INITIAL_SIZE
-	Local $aStack[$iUBound]
-	$aStack[$STACK_INDEX] = $STACK_MAX - 1
-	$aStack[$STACK_COUNT] = 0
-	$aStack[$STACK_ID] = $STACK_GUID
-	$aStack[$STACK_UBOUND] = $iUBound
+	Local $iUBound = $STACK_MAX + (($iCount > 0) ? $iCount : 4) ; STACK_INITIAL_SIZE
+	Local $aStack_New[$iUBound]
+	$aStack_New[$STACK_INDEX] = $STACK_MAX - 1
+	$aStack_New[$STACK_COUNT] = 0
+	$aStack_New[$STACK_ID] = $STACK_GUID
+	$aStack_New[$STACK_UBOUND] = $iUBound
 
-	If $bIsCopyObjects And $iCount > 0 Then ; If copy previous count is greater than zero then add the copy the items/objects.
-		$aStack[$STACK_INDEX] = $STACK_MAX - 1 + $iCount
-		$aStack[$STACK_COUNT] = $iCount
+	If $bIsCopyObjects And $iCount > 0 Then ; If copy the previous objects is true and the count is greater than zero then copy.
+		$aStack_New[$STACK_INDEX] = $STACK_MAX - 1 + $iCount
+		$aStack_New[$STACK_COUNT] = $iCount
 
-		ReDim $aStack[$aStack[$STACK_UBOUND]]
+		For $i = $STACK_MAX To $aStack[$STACK_INDEX]
+			$aStack_New[$i] = $aStack[$i]
+		Next
 	EndIf
-	$vStack = 0
-	Return $aStack
+	$aStack = $aStack_New
+	$aStack_New = 0
+	Return True
 EndFunc   ;==>__Stack
+
+; #INTERNAL_USE_ONLY# ===========================================================================================================
+; Name ..........: __Stack_IsAPI
+; Description ...: Determine if the variable is a valid stack handle.
+; Syntax ........: __Stack_IsAPI(ByRef $aStack)
+; Parameters ....: $aStack              - [in/out] Handle returned by Stack().
+; Return values .: Success: True.
+;				   Failure: False.
+; Author ........: guinness
+; ===============================================================================================================================
+Func __Stack_IsAPI(ByRef $aStack)
+	Return UBound($aStack) >= $STACK_MAX And $aStack[$STACK_ID] = $STACK_GUID
+EndFunc   ;==>__Stack_IsAPI
