@@ -58,7 +58,7 @@ EndFunc   ;==>ShuntingYard_Calculate
 
 Func ShuntingYard_Parse($sExpression)
 	Local $aChar = StringSplit($sExpression, '', $STR_NOCOUNT), _
-			$fIsBracket = False, _ ; Is parenthesis.
+			$bIsBracket = False, _ ; Is parenthesis.
 			$hStack = Stack(), _ ; Create a stack to push/pop to.
 			$sOutput, _ ; Output string.
 			$sToken = '' ; Token.
@@ -69,8 +69,8 @@ Func ShuntingYard_Parse($sExpression)
 			$sOutput &= $sToken
 		ElseIf __ShuntingYard_IsOperator($sToken) Then ; Check if a valid token.
 			If __ShuntingYard_IsBracket($sToken) Then
-				$fIsBracket = $sToken == '(' ; True if open bracket else False if closing.
-				If $fIsBracket Then ; Open bracket.
+				$bIsBracket = $sToken == '(' ; True if open bracket else False if closing.
+				If $bIsBracket Then ; Open bracket.
 					Stack_Push($hStack, $sToken)
 				Else ; Closing bracket.
 					$sOutput &= ' '
