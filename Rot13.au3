@@ -12,18 +12,16 @@ Func Example()
 EndFunc   ;==>Example
 
 Func Rot13($sData)
-	Local $aArray = StringSplit($sData, '', $STR_NOCOUNT), _
-			$iChr = 0, _
-			$sReturn = ''
+	If $sData == '' Then
+		Return $sData
+	EndIf
+	Local $aArray = StringToASCIIArray($sData)
 	For $i = 0 To UBound($aArray) - 1
-		$iChr = Asc($aArray[$i])
-		If ($iChr >= 65 And $iChr <= 77) Or ($iChr >= 97 And $iChr <= 109) Then
-			$sReturn &= Chr($iChr + 13)
-		ElseIf ($iChr >= 78 And $iChr <= 90) Or ($iChr >= 110 And $iChr <= 122) Then
-			$sReturn &= Chr($iChr - 13)
-		Else
-			$sReturn &= $aArray[$i]
+		If ($aArray[$i] >= 65 And $aArray[$i] <= 77) Or ($aArray[$i] >= 97 And $aArray[$i] <= 109) Then
+			$aArray[$i] += 13
+		ElseIf ($aArray[$i] >= 78 And $aArray[$i] <= 90) Or ($aArray[$i] >= 110 And $aArray[$i] <= 122) Then
+			$aArray[$i] -= 13
 		EndIf
 	Next
-	Return $sReturn
+	Return StringFromASCIIArray($aArray)
 EndFunc   ;==>Rot13
