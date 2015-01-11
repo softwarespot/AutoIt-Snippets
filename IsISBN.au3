@@ -55,8 +55,7 @@ Func IsISBN($sISBN, $iType)
 	Local $iCounter = 0, $iSum = 0
 	Switch $iType
 		Case $iType10
-			Local $bIsXFound = $aArray[$iLength] = 88 Or $aArray[$iLength] = 120
-			If $bIsXFound Then
+			If $aArray[$iLength] = 88 Or $aArray[$iLength] = 120 Then
 				$iLength -= 1
 				$iSum = 10
 			EndIf
@@ -69,10 +68,7 @@ Func IsISBN($sISBN, $iType)
 				$iSum += ($aArray[$i] - $iZero) * $iCounter
 				$iCounter -= 1
 			Next
-
-			If $iCounter = 0 Or ($bIsXFound And $iCounter = 1) Then
-				Return Mod($iSum, 11) = 0 ; Divisible by 11.
-			EndIf
+			Return Mod($iSum, 11) = 0 ; Divisible by 11.
 
 		Case $iType13
 			Local Const $iOne = 1, $iThree = 3
@@ -84,9 +80,7 @@ Func IsISBN($sISBN, $iType)
 				$iSum += ($aArray[$i] - $iZero) * $iCounter
 				$iCounter = ($iCounter = $iOne) ? $iThree : $iOne
 			Next
-			If $iCounter = $iThree Then
-				Return Mod($iSum, 10) = 0 ; Divisible by 10.
-			EndIf
+			Return Mod($iSum, 10) = 0 ; Divisible by 10.
 	EndSwitch
 
 	Return False
