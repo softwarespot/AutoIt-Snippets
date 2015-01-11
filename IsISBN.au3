@@ -5,7 +5,7 @@ Example()
 Func Example()
 	Local Const $iType10 = 10, $iType13 = 13
 
-	; 10 digit ISBN numbers.
+	; 10-digit ISBN numbers.
 	PrintISBN('ISBN0-9752298-0-X', $iType10, True) ; Is a 10-digit ISBN number.
 	PrintISBN('ISBN0-9752298-0-4', $iType10, False) ; Is not a 10-digit ISBN number.
 	PrintISBN('ISBN1-84356-028-3', $iType10, True) ; Is a 10-digit ISBN number.
@@ -15,7 +15,7 @@ Func Example()
 
 	ConsoleWrite(@CRLF) ; Empty line.
 
-	; 13 digit ISBN numbers.
+	; 13-digit ISBN numbers.
 	PrintISBN('ISBN-13: 978-0-306-40615-7', $iType13, True) ; Is a 13 digit ISBN number.
 	PrintISBN('ISBN-13: 978-1-86197-876-9', $iType13, True) ; Is a 13 digit ISBN number.
 	PrintISBN('ISBN-13: 978-1-86197-876-8', $iType13, False) ; Is not a 13 digit ISBN number.
