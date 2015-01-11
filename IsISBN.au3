@@ -16,9 +16,9 @@ Func Example()
 	ConsoleWrite(@CRLF) ; Empty line.
 
 	; 13-digit ISBN numbers.
-	PrintISBN('ISBN-13: 978-0-306-40615-7', $iType13, True) ; Is a 13 digit ISBN number.
-	PrintISBN('ISBN-13: 978-1-86197-876-9', $iType13, True) ; Is a 13 digit ISBN number.
-	PrintISBN('ISBN-13: 978-1-86197-876-8', $iType13, False) ; Is not a 13 digit ISBN number.
+	PrintISBN('ISBN-13: 978-0-306-40615-7', $iType13, True) ; Is a 13-digit ISBN number.
+	PrintISBN('ISBN-13: 978-1-86197-876-9', $iType13, True) ; Is a 13-digit ISBN number.
+	PrintISBN('ISBN-13: 978-1-86197-876-8', $iType13, False) ; Is not a 13-digit ISBN number.
 EndFunc   ;==>Example
 
 Func PrintISBN($sISBN, $iType, $bExpected)
