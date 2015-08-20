@@ -1,6 +1,7 @@
 #include <WinAPIFiles.au3>
 
-Global Enum Step *2 $GETFILES_NOT_DIRECTORY, $GETFILES_NOT_EXISTS ; GetFiles @error
+; @error enumeration
+Global Enum Step * 2 $GETFILES_NOT_DIRECTORY, $GETFILES_NOT_EXISTS
 
 Example()
 
@@ -8,7 +9,7 @@ Func Example()
 	Local $sFileList = ''
 	GetFiles($sFileList, @ScriptDir) ; This uses no global variable
 	If @error Then
-		ConsoleWrite("Error: Check the enumeration above that matches the error code = " & @error & @CRLF)
+		ConsoleWrite('Error: Check the enumeration above that matches the error code = ' & @error & @CRLF)
 	Else
 		$sFileList = StringReplace($sFileList, '|', @CRLF) ; Replace the pipe char for @CRLF
 		ConsoleWrite($sFileList & @CRLF)
@@ -24,7 +25,7 @@ Func GetFiles(ByRef $sFileList, $sFilePath)
 	EndIf
 
 	Local $hFileFind = FileFindFirstFile($sFilePath & '*')
-	If $hFileFind = -1 Then ; File not found
+	If $hFileFind == -1 Then ; File not found
 		Return SetError($GETFILES_NOT_EXISTS, 0, '')
 	EndIf
 
@@ -35,7 +36,7 @@ Func GetFiles(ByRef $sFileList, $sFilePath)
 			ExitLoop
 		EndIf
 
-		If @extended Then ; Is directory.
+		If @extended Then ; Is directory
 			$iCounter += 1 ; Used for recursion level
 			GetFiles($sFileList, $sFilePath & $sFileName)
 			$iCounter -= 1 ; Used for recursion level
@@ -45,7 +46,8 @@ Func GetFiles(ByRef $sFileList, $sFilePath)
 	WEnd
 	FileClose($hFileFind)
 
-	If $iCounter = 0 Then ; First recursion level, therefore strip pipe char
+	; First recursion level, therefore strip pipe char
+	If Not $iCounter Then
 		$sFileList = StringTrimRight($sFileList, StringLen('|'))
 	EndIf
 EndFunc   ;==>GetFiles
