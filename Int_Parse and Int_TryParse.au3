@@ -27,34 +27,36 @@ EndFunc   ;==>Example
 ; Returns the integer parsed or NaN.
 Func Int_Parse($sValue)
 	Local $iValue
-	Return (Int_TryParse($sValue, $iValue) ? $iValue : $NAN) ; This is just a wrapper around Int_TryParse().
+	Return Int_TryParse($sValue, $iValue) ? $iValue : $NAN ; This is just a wrapper around Int_TryParse().
 EndFunc   ;==>Int_Parse
 
 ; Returns true or false if the string was parsed as an integer and sets the ByRef variable to either zero (if on failure) or the integer parsed.
 Func Int_TryParse($sValue, ByRef $iValue)
 	$iValue = 0 ; Set the out parameter.
-	Local $bIsParse = False
-	If Not (StringStripWS($sValue, $STR_STRIPALL) == '') Or Not ($sValue == Null) Then
-		$bIsParse = True
 
-		Local $aChars = StringToASCIIArray($sValue), _
-				$iIterator = 1
-		For $i = UBound($aChars) - 1 To 0 Step -1 ; Reverse through the loop.
-			If $aChars[$i] < $ASCII_0 Or $aChars[$i] > $ASCII_9 Then
-				If $i = 0 And $aChars[$i] = $ASCII_HYPHEN Then ; If the char is - (ASCII - $ASCII_HYPHEN (45)) then treat as a negative value.
-					$iValue *= -1
-				Else ; If not the end of the char array then it's not a number.
-					$bIsParse = False
-					$iValue = 0 ; Set the out parameter.
-				EndIf
-				ExitLoop
-			EndIf
-
-			If $aChars[$i] > 0 Then
-				$iValue += ($aChars[$i] - $ASCII_0) * $iIterator
-			EndIf
-			$iIterator *= 10
-		Next
+	If StringStripWS($sValue, $STR_STRIPALL) == '' Or $sValue == Null Then
+		Return False
 	EndIf
-	Return $bIsParse
+
+	Local $iIterator = 1
+	Local $aChars = StringToASCIIArray($sValue)
+	For $i = UBound($aChars) - 1 To 0 Step -1 ; Reverse through the loop.
+		Local $sChar = $aChars[$i]
+
+		; If not the end of the char array, then it's not a number.
+		If $i > 0 And ($sChar < $ASCII_0 Or $sChar > $ASCII_9) Then
+			$iValue = 0 ; Set the out parameter.
+			Return False
+		EndIf
+
+		If $i = 0 And $sChar = $ASCII_HYPHEN Then
+			; If the char is 45, then treat as a negative value.
+			$iValue *= -1
+		ElseIf $sChar > 0 Then
+			$iValue += ($sChar - $ASCII_0) * $iIterator
+			$iIterator *= 10
+		EndIf
+	Next
+
+	Return True
 EndFunc   ;==>Int_TryParse
